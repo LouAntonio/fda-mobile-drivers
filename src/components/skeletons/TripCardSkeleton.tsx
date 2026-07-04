@@ -4,7 +4,8 @@ import { SkeletonBox } from './SkeletonBox';
 
 export function TripCardSkeleton() {
 	return (
-		<View className="flex-row items-center bg-white dark:bg-soft-black rounded-2xl p-4 mb-3"
+		<View
+			className="flex-row bg-white dark:bg-soft-black rounded-2xl mb-3 overflow-hidden"
 			style={{
 				elevation: 2,
 				shadowColor: '#000',
@@ -15,18 +16,14 @@ export function TripCardSkeleton() {
 				borderColor: 'rgba(0,0,0,0.04)',
 			}}
 		>
-			<SkeletonBox width={44} height={44} borderRadius={14} style={{ marginRight: 14 }} />
-			<View className="flex-1 mr-3">
-				<View className="flex-row items-center gap-1.5">
-					<SkeletonBox width="35%" height={16} borderRadius={6} />
-					<SkeletonBox width={12} height={12} borderRadius={6} />
-					<SkeletonBox width="35%" height={16} borderRadius={6} />
+			<View style={{ width: 4, backgroundColor: '#E5E7EB' }} />
+			<View className="flex-1 p-4 gap-2">
+				<View className="flex-row items-center justify-between">
+					<SkeletonBox width={80} height={14} borderRadius={6} />
+					<SkeletonBox width={70} height={18} borderRadius={6} />
 				</View>
-				<SkeletonBox width="50%" height={12} borderRadius={6} style={{ marginTop: 8 }} />
-			</View>
-			<View className="items-end gap-2">
-				<SkeletonBox width={60} height={18} borderRadius={6} />
-				<SkeletonBox width={50} height={22} borderRadius={10} />
+				<SkeletonBox width="90%" height={14} borderRadius={6} />
+				<SkeletonBox width="45%" height={12} borderRadius={6} />
 			</View>
 		</View>
 	);

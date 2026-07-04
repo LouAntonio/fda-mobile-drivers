@@ -23,17 +23,64 @@ import { useTrips } from '../../hooks/useTrips';
 import type { TripStatus, ServiceType } from '../../types/api';
 import { TripCardSkeleton } from '../../components/skeletons/TripCardSkeleton';
 
+const STATUS_OPTIONS = [
+	{ key: 'all', label: 'Todos' },
+	{ key: 'COMPLETED' as const, label: 'Concluídos' },
+	{ key: 'CANCELLED' as const, label: 'Cancelados' },
+];
+
+const TYPE_OPTIONS = [
+	{ key: 'all', label: 'Ambos' },
+	{ key: 'RIDE' as const, label: 'Corrida' },
+	{ key: 'DELIVERY' as const, label: 'Entrega' },
+];
+
+type StatusKey = (typeof STATUS_OPTIONS)[number]['key'];
+type TypeKey = (typeof TYPE_OPTIONS)[number]['key'];
+
+const STATUS_COLORS: Record<string, string> = {
+	COMPLETED: '#10B981',
+	CANCELLED: '#ED1C24',
+	REQUESTED: '#F59E0B',
+	ACCEPTED: '#3B82F6',
+	PICKUP_IN_PROGRESS: '#3B82F6',
+	STARTED: '#3B82F6',
+};
+
+function formatDate(iso: string) {
+	const d = new Date(iso);
+	return d.toLocaleDateString('pt-AO', {
+		day: '2-digit',
+		month: 'short',
+		year: 'numeric',
+	});
+}
+
+function formatTime(iso: string) {
+	const d = new Date(iso);
+	return d.toLocaleTimeString('pt-AO', {
+		hour: '2-digit',
+		minute: '2-digit',
+	});
+}
+
+function formatPrice(price: number): string {
+	return new Intl.NumberFormat('pt-AO', {
+		style: 'currency',
+		currency: 'AOA',
+		minimumFractionDigits: 0,
+	})
+		.format(price)
+		.replace('AOA', 'Kz')
+		.trim();
+}
+
 export default function HistoryScreen() {
 	const navigation = useNavigation<any>();
 	const { themeColors, isDark } = useThemeColors();
 
-	const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-	const [statusFilter, setStatusFilter] = useState<
-		'all' | TripStatus
-	>('all');
-	const [typeFilter, setTypeFilter] = useState<
-		'all' | ServiceType
-	>('all');
+	const [statusFilter, setStatusFilter] = useState<StatusKey>('all');
+	const [typeFilter, setTypeFilter] = useState<TypeKey>('all');
 	const [periodFilter, setPeriodFilter] = useState<
 		'all' | 'today' | 'week' | 'month' | 'custom'
 	>('all');
@@ -41,6 +88,7 @@ export default function HistoryScreen() {
 	const [customEnd, setCustomEnd] = useState<Date | null>(null);
 	const [showStartPicker, setShowStartPicker] = useState(false);
 	const [showEndPicker, setShowEndPicker] = useState(false);
+	const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
 	const apiFilters = useMemo(() => {
 		const filters: Record<string, unknown> = { limit: 50 };
@@ -84,31 +132,16 @@ export default function HistoryScreen() {
 		[data],
 	);
 
-	const formatDate = (iso: string) => {
-		const d = new Date(iso);
-		return d.toLocaleDateString('pt-AO', {
-			day: '2-digit',
-			month: 'short',
-			year: 'numeric',
-		});
-	};
-
-	const formatTime = (iso: string) => {
-		const d = new Date(iso);
-		return d.toLocaleTimeString('pt-AO', {
-			hour: '2-digit',
-			minute: '2-digit',
-		});
-	};
-
-	const getStatusConfig = (status: TripStatus) => {
-		const isCompleted = status === 'COMPLETED';
-		return {
-			isCompleted,
-			label: isCompleted ? 'Concluído' : 'Cancelado',
-			color: isCompleted ? '#10B981' : '#ED1C24',
-			bgColor: isCompleted ? '#10B98115' : '#ED1C2415',
-		};
+	const getStatusColor = (status: TripStatus) =>
+		STATUS_COLORS[status] || '#6B7280';
+	const getStatusLabel = (status: TripStatus) => {
+		if (status === 'COMPLETED') return 'Concluído';
+		if (status === 'CANCELLED') return 'Cancelado';
+		if (status === 'REQUESTED') return 'Solicitada';
+		if (status === 'ACCEPTED') return 'Aceite';
+		if (status === 'STARTED') return 'Em Andamento';
+		if (status === 'PICKUP_IN_PROGRESS') return 'Em Andamento';
+		return status;
 	};
 
 	return (
@@ -116,10 +149,8 @@ export default function HistoryScreen() {
 			className="flex-1"
 			style={{ backgroundColor: themeColors.background }}
 		>
-			<View
-				className="flex-row items-center justify-between px-5 py-3 border-b-2"
-				style={{ borderBottomColor: isDark ? '#262626' : '#F3F4F6' }}
-			>
+			{/* Header */}
+			<View className="flex-row items-center justify-between px-5 py-3">
 				<TouchableOpacity
 					onPress={() => navigation.goBack()}
 					className="w-10 h-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10"
@@ -150,6 +181,82 @@ export default function HistoryScreen() {
 				</TouchableOpacity>
 			</View>
 
+			{/* Horizontal filter chips */}
+			<View className="px-5 pb-3 gap-2">
+				<ScrollView
+					horizontal
+					showsHorizontalScrollIndicator={false}
+					className="gap-2"
+					contentContainerClassName="gap-2"
+				>
+					{STATUS_OPTIONS.map((opt) => {
+						const active = statusFilter === opt.key;
+						return (
+							<TouchableOpacity
+								key={opt.key}
+								className={`px-4 py-2 rounded-full border ${
+									active
+										? 'border-primary bg-primary'
+										: isDark
+											? 'border-gray-700 bg-[#1A1A1A]'
+											: 'border-gray-200 bg-white'
+								}`}
+								onPress={() => setStatusFilter(opt.key)}
+								activeOpacity={0.7}
+							>
+								<Text
+									className={`text-xs font-bold ${
+										active
+											? 'text-secondary'
+											: isDark
+												? 'text-gray-400'
+												: 'text-gray-500'
+									}`}
+								>
+									{opt.label}
+								</Text>
+							</TouchableOpacity>
+						);
+					})}
+				</ScrollView>
+				<ScrollView
+					horizontal
+					showsHorizontalScrollIndicator={false}
+					contentContainerClassName="gap-2"
+				>
+					{TYPE_OPTIONS.map((opt) => {
+						const active = typeFilter === opt.key;
+						return (
+							<TouchableOpacity
+								key={opt.key}
+								className={`px-4 py-2 rounded-full border ${
+									active
+										? 'border-primary bg-primary'
+										: isDark
+											? 'border-gray-700 bg-[#1A1A1A]'
+											: 'border-gray-200 bg-white'
+								}`}
+								onPress={() => setTypeFilter(opt.key)}
+								activeOpacity={0.7}
+							>
+								<Text
+									className={`text-xs font-bold ${
+										active
+											? 'text-secondary'
+											: isDark
+												? 'text-gray-400'
+												: 'text-gray-500'
+									}`}
+								>
+									{opt.label}
+								</Text>
+							</TouchableOpacity>
+						);
+					})}
+				</ScrollView>
+			</View>
+
+			{/* Trip list */}
 			<ScrollView
 				contentContainerClassName="px-5 pb-10"
 				showsVerticalScrollIndicator={false}
@@ -166,7 +273,7 @@ export default function HistoryScreen() {
 				}
 			>
 				{isLoading ? (
-					<View className="px-5 pt-4">
+					<View className="pt-4">
 						<TripCardSkeleton />
 						<TripCardSkeleton />
 						<TripCardSkeleton />
@@ -195,16 +302,28 @@ export default function HistoryScreen() {
 					</Animated.View>
 				) : (
 					allTrips.map((item, index) => {
-						const cfg = getStatusConfig(item.status);
+						const statusColor = getStatusColor(item.status);
 						return (
 							<Animated.View
 								key={item.id}
 								entering={FadeInRight.duration(500).delay(
-									index * 75,
+									index * 60,
 								)}
 							>
 								<TouchableOpacity
-									className={`p-4 rounded-2xl mb-4 border ${isDark ? 'border-gray-800 bg-[#121212]' : 'border-gray-100 bg-white'}`}
+									className="flex-row bg-white dark:bg-soft-black rounded-2xl mb-3 overflow-hidden active:opacity-70"
+									style={{
+										elevation: 2,
+										shadowColor: '#000',
+										shadowOffset: {
+											width: 0,
+											height: 2,
+										},
+										shadowOpacity: 0.05,
+										shadowRadius: 8,
+										borderWidth: 1,
+										borderColor: 'rgba(0,0,0,0.04)',
+									}}
 									activeOpacity={0.7}
 									onPress={() =>
 										navigation.navigate('TripDetail', {
@@ -212,96 +331,126 @@ export default function HistoryScreen() {
 										})
 									}
 								>
-									<View className="flex-row items-center justify-between mb-4">
-										<View className="flex-row items-center bg-black/5 dark:bg-white/10 px-3 py-1.5 rounded-lg gap-2">
-											<Ionicons
-												name={
-													item.serviceType === 'RIDE'
-														? 'car-outline'
-														: 'cube-outline'
-												}
-												size={16}
-												color={themeColors.text}
-											/>
-											<Text
-												className="text-xs font-bold"
-												style={{
-													color: themeColors.text,
-												}}
-											>
-												{item.serviceType === 'RIDE'
-													? 'Corrida'
-													: 'Entrega'}
-											</Text>
-										</View>
-										<View
-											className={`flex-row items-center px-3 py-1.5 rounded-lg gap-2`}
-											style={{ backgroundColor: cfg.bgColor }}
-										>
-											<View
-												className="w-2 h-2 rounded-full"
-												style={{ backgroundColor: cfg.color }}
-											/>
-											<Text
-												className="text-xs font-bold"
-												style={{ color: cfg.color }}
-											>
-												{cfg.label}
-											</Text>
-										</View>
-									</View>
+									{/* Left accent */}
+									<View
+										style={{
+											width: 4,
+											backgroundColor: statusColor,
+										}}
+									/>
 
-									<View className="mb-5 pl-1">
-										<View className="flex-row items-start">
-											<View className="w-4 items-center mr-3 mt-1">
-												<View className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-												<View className="w-0.5 h-5 bg-gray-200 dark:bg-gray-700 my-1 rounded-full" />
+									<View className="flex-1 p-4">
+										{/* Top row: service type + status + price */}
+										<View className="flex-row items-center justify-between mb-2">
+											<View className="flex-row items-center gap-2">
+												<View className="flex-row items-center gap-1">
+													<Ionicons
+														name={
+															item.serviceType ===
+															'RIDE'
+																? 'car-outline'
+																: 'cube-outline'
+														}
+														size={14}
+														color={statusColor}
+													/>
+													<Text className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+														{item.serviceType ===
+														'RIDE'
+															? 'Corrida'
+															: 'Entrega'}
+													</Text>
+												</View>
 												<View
-													className={`w-2.5 h-2.5 rounded-full ${cfg.isCompleted ? 'bg-primary' : 'bg-red-500'}`}
+													className="w-1 h-1 rounded-full"
+													style={{
+														backgroundColor:
+															isDark
+																? '#404040'
+																: '#D1D5DB',
+													}}
+												/>
+												<Text
+													className="text-xs font-bold"
+													style={{
+														color: statusColor,
+													}}
+												>
+													{getStatusLabel(
+														item.status,
+													)}
+												</Text>
+											</View>
+											<Text className="text-base font-extrabold text-secondary dark:text-off-white">
+												{formatPrice(
+													Number(item.totalPrice),
+												)}
+											</Text>
+										</View>
+
+										{/* Route */}
+										<View className="flex-row items-center mb-1.5">
+											<View className="w-4 items-center mr-2">
+												<View className="w-2 h-2 rounded-full bg-blue-500" />
+												<View className="w-0.5 h-4 bg-gray-200 dark:bg-gray-700 my-0.5 rounded-full" />
+												<View
+													className={`w-2 h-2 rounded-full ${
+														item.status ===
+														'COMPLETED'
+															? 'bg-primary'
+															: 'bg-red-500'
+													}`}
 												/>
 											</View>
-											<View className="flex-1 gap-3">
+											<View className="flex-1 gap-1">
 												<Text
-													className="text-sm font-medium tracking-tight"
-													style={{
-														color: themeColors.text,
-													}}
+													className="text-sm font-bold text-secondary dark:text-off-white"
 													numberOfLines={1}
 												>
 													{item.pickupAddress}
 												</Text>
 												<Text
-													className="text-sm font-medium tracking-tight"
-													style={{
-														color: themeColors.text,
-													}}
+													className="text-sm font-bold text-secondary dark:text-off-white"
 													numberOfLines={1}
 												>
 													{item.dropoffAddress}
 												</Text>
 											</View>
 										</View>
-									</View>
 
-									<View className="flex-row justify-between items-end border-t border-gray-100 dark:border-gray-800 pt-3">
-										<View>
-											{item.driver && (
-												<Text className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">
-													{item.driver.user?.name} {item.driver.user?.surname}
-												</Text>
-											)}
+										{/* Bottom row: driver + date */}
+										<View className="flex-row items-center justify-between mt-1.5">
 											<View className="flex-row items-center gap-2">
-												<Text className="text-xs font-medium text-gray-500 dark:text-gray-400">
-													{formatDate(item.requestedAt)} • {formatTime(item.requestedAt)}
+												{item.driver && (
+													<>
+														<View className="flex-row items-center gap-1">
+															<Ionicons
+																name="person-outline"
+																size={12}
+																color="#9CA3AF"
+															/>
+															<Text className="text-xs font-medium text-gray-500 dark:text-gray-400">
+																{item.driver
+																	.user
+																	?.name || ''}
+															</Text>
+														</View>
+														<View
+															className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"
+														/>
+													</>
+												)}
+												<Text className="text-xs font-medium text-gray-400 dark:text-gray-500">
+													{formatDate(
+														item.requestedAt,
+													)}{' '}
+													•{' '}
+													{formatTime(
+														item.requestedAt,
+													)}
 												</Text>
 											</View>
 										</View>
-										<Text
-											className="text-lg font-black tracking-tighter"
-											style={{ color: themeColors.text }}
-										>
-											{Number(item.totalPrice).toLocaleString('pt-AO')} Kz
-										</Text>
 									</View>
 								</TouchableOpacity>
 							</Animated.View>
@@ -316,6 +465,7 @@ export default function HistoryScreen() {
 				)}
 			</ScrollView>
 
+			{/* Filter modal — date only */}
 			<Modal
 				visible={isFilterModalOpen}
 				transparent={true}
@@ -332,13 +482,13 @@ export default function HistoryScreen() {
 					/>
 					<View
 						className={`rounded-t-3xl pt-6 pb-10 px-6 ${isDark ? 'bg-[#121212]' : 'bg-white'}`}
-						style={{ minHeight: '60%' }}
+						style={{ minHeight: '50%' }}
 					>
 						<View className="flex-row items-center justify-between mb-6">
 							<Text
 								className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}
 							>
-								Filtros
+								Filtrar por Data
 							</Text>
 							<TouchableOpacity
 								onPress={() => setIsFilterModalOpen(false)}
@@ -354,76 +504,14 @@ export default function HistoryScreen() {
 
 						<ScrollView
 							showsVerticalScrollIndicator={false}
-							contentContainerClassName="pb-10"
+							contentContainerClassName="pb-6"
 						>
 							<Text
 								className={`text-sm font-bold uppercase tracking-wider mb-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
 							>
-								Status
+								Período
 							</Text>
 							<View className="flex-row flex-wrap gap-2 mb-6">
-								{(
-									['all', 'COMPLETED', 'CANCELLED'] as const
-								).map((f) => {
-									const isActive = statusFilter === f;
-									return (
-										<TouchableOpacity
-											key={f}
-											className={`px-4 py-2 rounded-full border ${isActive ? 'border-primary bg-primary' : 'border-gray-200 dark:border-gray-800'}`}
-											onPress={() => setStatusFilter(f)}
-											activeOpacity={0.7}
-										>
-											<Text
-												className={`text-sm font-semibold ${isActive ? 'text-soft-black' : isDark ? 'text-gray-400' : 'text-gray-500'}`}
-											>
-												{f === 'all'
-													? 'Todos'
-													: f === 'COMPLETED'
-														? 'Concluídos'
-														: 'Cancelados'}
-											</Text>
-										</TouchableOpacity>
-									);
-								})}
-							</View>
-
-							<Text
-								className={`text-sm font-bold uppercase tracking-wider mb-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
-							>
-								Tipo de Viagem
-							</Text>
-							<View className="flex-row flex-wrap gap-2 mb-6">
-								{(['all', 'RIDE', 'DELIVERY'] as const).map(
-									(f) => {
-										const isActive = typeFilter === f;
-										return (
-											<TouchableOpacity
-												key={f}
-												className={`px-4 py-2 rounded-full border ${isActive ? 'border-primary bg-primary' : 'border-gray-200 dark:border-gray-800'}`}
-												onPress={() => setTypeFilter(f)}
-												activeOpacity={0.7}
-											>
-												<Text
-													className={`text-sm font-semibold ${isActive ? 'text-soft-black' : isDark ? 'text-gray-400' : 'text-gray-500'}`}
-												>
-													{f === 'all'
-														? 'Todos'
-														: f === 'RIDE'
-															? 'Corrida'
-															: 'Entrega'}
-												</Text>
-											</TouchableOpacity>
-										);
-									},
-								)}
-							</View>
-
-							<Text
-								className={`text-sm font-bold uppercase tracking-wider mb-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
-							>
-								Data
-							</Text>
-							<View className="flex-row flex-wrap gap-2 mb-4">
 								{(
 									[
 										'all',
@@ -437,8 +525,10 @@ export default function HistoryScreen() {
 									return (
 										<TouchableOpacity
 											key={f}
-											className={`px-4 py-2 rounded-full border ${isActive ? 'border-primary bg-primary' : 'border-gray-200 dark:border-gray-800'}`}
-											onPress={() => setPeriodFilter(f)}
+											className={`px-4 py-2 rounded-full border ${isActive ? 'border-primary bg-primary' : isDark ? 'border-gray-700 bg-[#1A1A1A]' : 'border-gray-200 bg-white'}`}
+											onPress={() =>
+												setPeriodFilter(f)
+											}
 											activeOpacity={0.7}
 										>
 											<Text
@@ -462,7 +552,6 @@ export default function HistoryScreen() {
 							{periodFilter === 'custom' && (
 								<Animated.View
 									entering={FadeInDown.duration(300)}
-									className="mb-6"
 								>
 									<View className="flex-row gap-4">
 										<View className="flex-1">
@@ -490,7 +579,9 @@ export default function HistoryScreen() {
 													}
 												>
 													{customStart
-														? customStart.toLocaleDateString('pt-AO')
+														? customStart.toLocaleDateString(
+																'pt-AO',
+															)
 														: 'Selecionar...'}
 												</Text>
 												<Ionicons
@@ -505,7 +596,10 @@ export default function HistoryScreen() {
 											</TouchableOpacity>
 											{showStartPicker && (
 												<DateTimePicker
-													value={customStart ?? new Date()}
+													value={
+														customStart ??
+														new Date()
+													}
 													mode="date"
 													display="default"
 													onChange={(
@@ -549,7 +643,9 @@ export default function HistoryScreen() {
 													}
 												>
 													{customEnd
-														? customEnd.toLocaleDateString('pt-AO')
+														? customEnd.toLocaleDateString(
+																'pt-AO',
+															)
 														: 'Selecionar...'}
 												</Text>
 												<Ionicons
@@ -564,7 +660,9 @@ export default function HistoryScreen() {
 											</TouchableOpacity>
 											{showEndPicker && (
 												<DateTimePicker
-													value={customEnd ?? new Date()}
+													value={
+														customEnd ?? new Date()
+													}
 													mode="date"
 													display="default"
 													onChange={(
@@ -588,12 +686,10 @@ export default function HistoryScreen() {
 							)}
 						</ScrollView>
 
-						<View className="flex-row gap-3 pt-4 border-t border-gray-100 dark:border-gray-900 mt-auto">
+						<View className="flex-row gap-3 pt-4 border-t border-gray-100 dark:border-gray-900">
 							<TouchableOpacity
 								className="flex-1 py-3.5 rounded-xl border border-gray-300 dark:border-gray-700 items-center justify-center"
 								onPress={() => {
-									setStatusFilter('all');
-									setTypeFilter('all');
 									setPeriodFilter('all');
 									setCustomStart(null);
 									setCustomEnd(null);
@@ -620,5 +716,3 @@ export default function HistoryScreen() {
 		</SafeAreaView>
 	);
 }
-
-

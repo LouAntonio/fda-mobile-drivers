@@ -12,7 +12,6 @@ import {
 	Pressable,
 	Keyboard,
 	TouchableWithoutFeedback,
-	ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -26,7 +25,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useAuthStore } from '../../store/authStore';
 import { ProfileHeader } from '../../components/profile/ProfileHeader';
-import { StatCard } from '../../components/profile/StatCard';
+import { StatCard, StatItem } from '../../components/profile/StatCard';
 import { TripCard, TripItem } from '../../components/profile/TripCard';
 import { ProfileHeaderSkeleton } from '../../components/skeletons/ProfileHeaderSkeleton';
 import { StatCardGridSkeleton } from '../../components/skeletons/StatCardSkeleton';
@@ -66,7 +65,12 @@ export default function ProfileScreen() {
 	const updateMutation = useMutation({
 		mutationFn: updateProfile,
 		onSuccess: (res) => {
-			const data = res.data as unknown as { data: import('../../store/authStore').User & { name: string; surname: string } };
+			const data = res.data as unknown as {
+				data: import('../../store/authStore').User & {
+					name: string;
+					surname: string;
+				};
+			};
 			if (data?.data) {
 				setUser(data.data as any);
 			}
@@ -76,7 +80,10 @@ export default function ProfileScreen() {
 			Alert.alert('Sucesso', 'Perfil atualizado!');
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao atualizar perfil.');
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao atualizar perfil.',
+			);
 		},
 	});
 
@@ -127,62 +134,58 @@ export default function ProfileScreen() {
 		updateMutation.mutate({ name: editName, surname: editSurname });
 	};
 
-	const isLoading = profileQuery.isLoading || tripsLoading || statsQuery.isLoading;
+	const isLoading =
+		profileQuery.isLoading || tripsLoading || statsQuery.isLoading;
 	const error = profileQuery.error;
 	const user = profileQuery.data?.user;
 	const stats: ProfileStats | undefined = statsQuery.data?.stats;
 
-	const trips: TripItem[] = (tripsData?.pages?.[0]?.trips ?? []).map((t) => ({
+	const trips: TripItem[] = (
+		tripsData?.pages?.[0]?.trips ?? []
+	).map((t) => ({
 		...t,
 		totalPrice: Number(t.totalPrice),
 	})) as TripItem[];
 
-	const statCards = stats
+	const statCards: StatItem[] = stats
 		? [
 				{
 					id: '1',
 					label: 'Viagens',
 					value: String(stats.totalTrips),
-					icon: 'bicycle',
-					color: '#FFD700',
-					bgColor: '#FFF9E0',
 				},
 				{
 					id: '2',
 					label: 'Distância',
 					value: `${stats.totalDistanceKm.toFixed(0)} km`,
-					icon: 'location-sharp',
-					color: '#10B981',
-					bgColor: '#E8FDF5',
 				},
 				{
 					id: '3',
 					label: 'Tempo',
 					value: formatDuration(stats.totalDurationMin),
-					icon: 'time-sharp',
-					color: '#3B82F6',
-					bgColor: '#EBF5FF',
 				},
 				{
 					id: '4',
 					label: 'Total Gasto',
 					value: `${stats.totalSpent.toLocaleString('pt-AO')} Kz`,
-					icon: 'wallet-sharp',
-					color: '#8B5CF6',
-					bgColor: '#F3EEFF',
 				},
 			]
 		: [];
 
 	return (
 		<SafeAreaView className="flex-1 bg-off-white dark:bg-[#090909]">
-			<View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+			{/* Header */}
+			<View className="flex-row items-center justify-between px-4 py-3">
 				<TouchableOpacity
 					className="p-2"
 					onPress={() => navigation.goBack()}
 					activeOpacity={0.7}
 				>
-					<Ionicons name="chevron-back" size={28} color="#231F20" />
+					<Ionicons
+						name="chevron-back"
+						size={28}
+						color="#231F20"
+					/>
 				</TouchableOpacity>
 				<Text className="text-lg font-bold text-secondary dark:text-off-white">
 					Meu Perfil
@@ -234,6 +237,7 @@ export default function ProfileScreen() {
 					</View>
 				) : (
 					<>
+						{/* Hero */}
 						<Animated.View
 							entering={FadeInDown.duration(600)}
 							className="mt-5 mb-2"
@@ -246,34 +250,56 @@ export default function ProfileScreen() {
 								}
 								email={user?.email}
 								image={user?.image}
-								phoneNumberVerified={user?.phoneNumberVerified}
+								phoneNumberVerified={
+									user?.phoneNumberVerified
+								}
 								emailVerified={user?.emailVerified}
 								onEditPress={handleEditPress}
 							/>
 						</Animated.View>
 
-						<Animated.View
-							entering={FadeInDown.duration(600).delay(150)}
-							className="mt-6"
-						>
-							<Text className="text-xl font-extrabold text-secondary dark:text-off-white mb-4 tracking-tight">
-								Estatísticas
-							</Text>
-							<View className="flex-row flex-wrap justify-between -mx-1">
-								{statCards.map((s, index) => (
-									<Animated.View
-										key={s.id}
-										entering={FadeInUp.duration(500).delay(
-											200 + index * 100,
-										)}
-										className="w-[48%]"
-									>
-										<StatCard stat={s} />
-									</Animated.View>
-								))}
-							</View>
-						</Animated.View>
+						{/* Stats — unified glass card */}
+						{stats && (
+							<Animated.View
+								entering={FadeInDown.duration(600).delay(150)}
+								className="mt-6"
+							>
+								<Text className="text-xl font-extrabold text-secondary dark:text-off-white mb-4 tracking-tight">
+									Estatísticas
+								</Text>
+								<View
+									className="bg-white dark:bg-soft-black rounded-2xl p-4"
+									style={{
+										elevation: 2,
+										shadowColor: '#000',
+										shadowOffset: {
+											width: 0,
+											height: 2,
+										},
+										shadowOpacity: 0.05,
+										shadowRadius: 8,
+										borderWidth: 1,
+										borderColor: 'rgba(0,0,0,0.04)',
+									}}
+								>
+									<View className="flex-row flex-wrap">
+										{statCards.map((s) => (
+											<Animated.View
+												key={s.id}
+												entering={FadeInUp.duration(
+													500,
+												).delay(200 + Number(s.id) * 60)}
+												className="w-1/2"
+											>
+												<StatCard stat={s} />
+											</Animated.View>
+										))}
+									</View>
+								</View>
+							</Animated.View>
+						)}
 
+						{/* Recent trips */}
 						<Animated.View
 							entering={FadeInDown.duration(600).delay(300)}
 							className="mt-6"
@@ -285,7 +311,9 @@ export default function ProfileScreen() {
 								<TouchableOpacity
 									activeOpacity={0.7}
 									className="py-1"
-									onPress={() => navigation.navigate('History' as never)}
+									onPress={() =>
+										navigation.navigate('History' as never)
+									}
 								>
 									<Text className="text-sm font-bold text-primary">
 										Ver todos
@@ -308,16 +336,19 @@ export default function ProfileScreen() {
 								trips.map((trip, index) => (
 									<Animated.View
 										key={trip.id}
-										entering={FadeInUp.duration(500).delay(
-											350 + index * 80,
-										)}
+										entering={FadeInUp.duration(
+											500,
+										).delay(350 + index * 80)}
 									>
 										<TripCard
 											trip={trip}
 											onPress={() =>
-												(navigation as any).navigate('TripDetail', {
-													tripId: trip.id,
-												})
+												(navigation as any).navigate(
+													'TripDetail',
+													{
+														tripId: trip.id,
+													},
+												)
 											}
 										/>
 									</Animated.View>
@@ -325,6 +356,7 @@ export default function ProfileScreen() {
 							)}
 						</Animated.View>
 
+						{/* Emergency contact */}
 						{(user?.emergencyContactName ||
 							user?.emergencyContactPhone) && (
 							<Animated.View
@@ -334,60 +366,75 @@ export default function ProfileScreen() {
 								<Text className="text-xl font-extrabold text-secondary dark:text-off-white mb-4 tracking-tight">
 									Contato de Emergência
 								</Text>
-								<View className="bg-white dark:bg-soft-black rounded-2xl p-5 shadow-sm">
-									{user?.emergencyContactName && (
-										<View className="flex-row items-center mb-2">
-											<Ionicons
-												name="person-outline"
-												size={18}
-												color="#6B7280"
-											/>
-											<Text className="text-base font-semibold text-secondary dark:text-off-white ml-3">
+								<View className="bg-white dark:bg-soft-black rounded-2xl p-4 flex-row items-center gap-4"
+									style={{
+										elevation: 2,
+										shadowColor: '#000',
+										shadowOffset: {
+											width: 0,
+											height: 2,
+										},
+										shadowOpacity: 0.05,
+										shadowRadius: 8,
+										borderWidth: 1,
+										borderColor: 'rgba(0,0,0,0.04)',
+									}}
+								>
+									<View className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-500/10 items-center justify-center">
+										<Ionicons
+											name="medkit-outline"
+											size={22}
+											color="#ED1C24"
+										/>
+									</View>
+									<View className="flex-1">
+										{user?.emergencyContactName && (
+											<Text className="text-base font-bold text-secondary dark:text-off-white">
 												{user.emergencyContactName}
 											</Text>
-										</View>
-									)}
-									{user?.emergencyContactPhone && (
-										<View className="flex-row items-center">
-											<Ionicons
-												name="call-outline"
-												size={18}
-												color="#6B7280"
-											/>
-											<Text className="text-base text-gray-500 dark:text-gray-400 ml-3">
+										)}
+										{user?.emergencyContactPhone && (
+											<Text className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5">
 												{user.emergencyContactPhone}
 											</Text>
-										</View>
-									)}
+										)}
+									</View>
+									<Ionicons
+										name="chevron-forward"
+										size={18}
+										color="#9CA3AF"
+									/>
 								</View>
 							</Animated.View>
 						)}
 
+						{/* Logout */}
 						<Animated.View
 							entering={FadeInDown.duration(600).delay(500)}
-							className="mt-8"
+							className="mt-8 items-center"
 						>
 							<TouchableOpacity
-								className="flex-row items-center justify-center bg-white dark:bg-soft-black py-4 px-6 rounded-2xl shadow-sm active:opacity-70"
+								className="flex-row items-center gap-2 py-3 px-6 active:opacity-60"
 								onPress={handleLogout}
 								activeOpacity={0.7}
 							>
 								<Ionicons
 									name="log-out-outline"
-									size={22}
+									size={18}
 									color="#ED1C24"
 								/>
-								<Text className="ml-3 text-base font-bold text-red-500">
+								<Text className="text-sm font-bold text-red-500">
 									Sair da Conta
 								</Text>
 							</TouchableOpacity>
 						</Animated.View>
 
+						{/* Version */}
 						<Animated.View
 							entering={FadeIn.duration(600).delay(550)}
-							className="mt-8 mb-4 items-center"
+							className="mt-4 mb-4 items-center"
 						>
-							<Text className="text-sm text-gray-400">
+							<Text className="text-xs text-gray-400">
 								Flash Delivery Angola v1.0.0
 							</Text>
 						</Animated.View>
@@ -395,6 +442,7 @@ export default function ProfileScreen() {
 				)}
 			</ScrollView>
 
+			{/* Edit modal */}
 			<Modal
 				visible={showEditModal}
 				animationType="slide"

@@ -10,7 +10,6 @@ import {
 	KeyboardAvoidingView,
 	Keyboard,
 	TouchableWithoutFeedback,
-	ActivityIndicator,
 	RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -29,6 +28,18 @@ const LABEL_OPTIONS: { label: string; value: AddressLabel; icon: string }[] = [
 	{ label: 'Trabalho', value: 'WORK', icon: 'briefcase' },
 	{ label: 'Outro', value: 'OTHER', icon: 'location-outline' },
 ];
+
+const LABEL_COLORS: Record<string, string> = {
+	HOME: '#FFD700',
+	WORK: '#3B82F6',
+	OTHER: '#6B7280',
+};
+
+const LABEL_BG: Record<string, string> = {
+	HOME: '#FFD70015',
+	WORK: '#3B82F615',
+	OTHER: '#6B728015',
+};
 
 export default function AddressesScreen() {
 	const navigation = useNavigation();
@@ -59,7 +70,8 @@ export default function AddressesScreen() {
 		createAddress(
 			{
 				label: selectedLabel,
-				customLabel: selectedLabel === 'OTHER' ? newLabel : undefined,
+				customLabel:
+					selectedLabel === 'OTHER' ? newLabel : undefined,
 				address: newAddress,
 				lat: -8.8399,
 				lng: 13.2344,
@@ -89,10 +101,8 @@ export default function AddressesScreen() {
 			className="flex-1"
 			style={{ backgroundColor: themeColors.background }}
 		>
-			<View
-				className="flex-row items-center justify-between px-5 py-3 border-b-2"
-				style={{ borderBottomColor: isDark ? '#262626' : '#F3F4F6' }}
-			>
+			{/* Header */}
+			<View className="flex-row items-center justify-between px-5 py-3">
 				<TouchableOpacity
 					onPress={() => navigation.goBack()}
 					className="w-10 h-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10"
@@ -112,7 +122,7 @@ export default function AddressesScreen() {
 				</Text>
 				<TouchableOpacity
 					onPress={() => setShowAddModal(true)}
-					className="w-10 h-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10"
+					className="w-10 h-10 items-center justify-center rounded-full bg-primary/10"
 					activeOpacity={0.7}
 				>
 					<Ionicons
@@ -127,7 +137,7 @@ export default function AddressesScreen() {
 				<AddressListSkeleton />
 			) : (
 				<ScrollView
-					contentContainerClassName="px-5 pb-10 pt-5"
+					contentContainerClassName="px-5 pb-10 pt-2"
 					showsVerticalScrollIndicator={false}
 					refreshControl={
 						<RefreshControl
@@ -138,31 +148,68 @@ export default function AddressesScreen() {
 				>
 					{addresses.length === 0 ? (
 						<View className="items-center py-20">
-							<Ionicons
-								name="location-outline"
-								size={48}
-								color="#9CA3AF"
-							/>
-							<Text className="text-gray-400 mt-3 text-base">
+							<View className="w-20 h-20 rounded-full bg-primary/10 items-center justify-center mb-4">
+								<Ionicons
+									name="location-outline"
+									size={36}
+									color={themeColors.primary}
+								/>
+							</View>
+							<Text
+								className="text-lg font-bold mt-2"
+								style={{ color: themeColors.text }}
+							>
 								Nenhum endereço salvo
+							</Text>
+							<Text className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">
+								Adicione endereços para agilizar suas viagens
 							</Text>
 						</View>
 					) : (
-						addresses.map((item, index) => (
-							<Animated.View
-								key={item.id}
-								entering={FadeInRight.duration(500).delay(
-									index * 100,
-								)}
-							>
-								<TouchableOpacity
-									className={`p-5 rounded-2xl mb-3 border ${isDark ? 'border-[#262626] bg-[#171717]' : 'border-gray-200 bg-white'}`}
-									activeOpacity={0.7}
+						addresses.map((item, index) => {
+							const accentColor =
+								LABEL_COLORS[item.label] || '#6B7280';
+							const bgAccent =
+								LABEL_BG[item.label] || '#6B728015';
+							return (
+								<Animated.View
+									key={item.id}
+									entering={FadeInRight.duration(
+										500,
+									).delay(index * 80)}
 								>
-									<View className="flex-row items-center justify-between">
-										<View className="flex-row items-center flex-1 pr-4 gap-3">
+									<TouchableOpacity
+										className="flex-row bg-white dark:bg-soft-black rounded-2xl mb-3 overflow-hidden active:opacity-70"
+										style={{
+											elevation: 2,
+											shadowColor: '#000',
+											shadowOffset: {
+												width: 0,
+												height: 2,
+											},
+											shadowOpacity: 0.05,
+											shadowRadius: 8,
+											borderWidth: 1,
+											borderColor:
+												'rgba(0,0,0,0.04)',
+										}}
+										activeOpacity={0.7}
+									>
+										{/* Left accent */}
+										<View
+											style={{
+												width: 4,
+												backgroundColor:
+													accentColor,
+											}}
+										/>
+
+										<View className="flex-row items-center flex-1 p-4 gap-3">
 											<View
-												className={`w-10 h-10 rounded-xl items-center justify-center ${isDark ? 'bg-yellow-500/10' : 'bg-yellow-50'}`}
+												className="w-11 h-11 rounded-xl items-center justify-center"
+												style={{
+													backgroundColor: bgAccent,
+												}}
 											>
 												<Ionicons
 													name={
@@ -171,12 +218,12 @@ export default function AddressesScreen() {
 														) as any
 													}
 													size={20}
-													color={themeColors.primary}
+													color={accentColor}
 												/>
 											</View>
 											<View className="flex-1">
 												<Text
-													className="text-lg font-extrabold tracking-tight mb-1"
+													className="text-base font-extrabold tracking-tight mb-0.5"
 													style={{
 														color: themeColors.text,
 													}}
@@ -191,48 +238,51 @@ export default function AddressesScreen() {
 													{item.address}
 												</Text>
 											</View>
+											<TouchableOpacity
+												onPress={() =>
+													handleDelete(item.id)
+												}
+												className="p-2.5 rounded-full bg-red-50 dark:bg-red-500/10"
+												activeOpacity={0.6}
+											>
+												<Ionicons
+													name="trash-outline"
+													size={18}
+													color="#EF4444"
+												/>
+											</TouchableOpacity>
 										</View>
-										<TouchableOpacity
-											onPress={() =>
-												handleDelete(item.id)
-											}
-											className={`p-2.5 rounded-full ${isDark ? 'bg-red-500/10' : 'bg-red-50'}`}
-											activeOpacity={0.6}
-										>
-											<Ionicons
-												name="trash-outline"
-												size={20}
-												color="#EF4444"
-											/>
-										</TouchableOpacity>
-									</View>
-								</TouchableOpacity>
-							</Animated.View>
-						))
+									</TouchableOpacity>
+								</Animated.View>
+							);
+						})
 					)}
 
-					<Animated.View entering={FadeInDown.duration(600)}>
-						<TouchableOpacity
-							onPress={() => setShowAddModal(true)}
-							className="flex-row items-center justify-center py-5 gap-2"
-							activeOpacity={0.6}
-						>
-							<Ionicons
-								name="add-circle-outline"
-								size={24}
-								color={themeColors.primary}
-							/>
-							<Text
-								className="text-base font-bold"
-								style={{ color: themeColors.primary }}
+					{addresses.length > 0 && (
+						<Animated.View entering={FadeInDown.duration(600)}>
+							<TouchableOpacity
+								onPress={() => setShowAddModal(true)}
+								className="flex-row items-center justify-center py-5 gap-2"
+								activeOpacity={0.6}
 							>
-								Adicionar novo endereço
-							</Text>
-						</TouchableOpacity>
-					</Animated.View>
+								<Ionicons
+									name="add-circle-outline"
+									size={24}
+									color={themeColors.primary}
+								/>
+								<Text
+									className="text-base font-bold"
+									style={{ color: themeColors.primary }}
+								>
+									Adicionar novo endereço
+								</Text>
+							</TouchableOpacity>
+						</Animated.View>
+					)}
 				</ScrollView>
 			)}
 
+			{/* Add modal */}
 			<Modal
 				visible={showAddModal}
 				animationType="slide"
@@ -274,41 +324,49 @@ export default function AddressesScreen() {
 								Tipo de endereço
 							</Text>
 							<View className="flex-row gap-3 mb-5">
-								{LABEL_OPTIONS.map((opt) => (
-									<TouchableOpacity
-										key={opt.value}
-										onPress={() =>
-											setSelectedLabel(opt.value)
-										}
-										className={`flex-1 flex-row items-center justify-center py-3 px-2 rounded-xl gap-1 ${
-											selectedLabel === opt.value
-												? 'bg-primary'
-												: isDark
-													? 'bg-[#262626]'
-													: 'bg-gray-100'
-										}`}
-										activeOpacity={0.7}
-									>
-										<Ionicons
-											name={opt.icon as any}
-											size={16}
-											color={
-												selectedLabel === opt.value
-													? '#231F20'
-													: themeColors.secondary
+								{LABEL_OPTIONS.map((opt) => {
+									const isActive =
+										selectedLabel === opt.value;
+									const accentColor =
+										LABEL_COLORS[opt.value];
+									return (
+										<TouchableOpacity
+											key={opt.value}
+											onPress={() =>
+												setSelectedLabel(
+													opt.value,
+												)
 											}
-										/>
-										<Text
-											className={`text-xs font-bold ${
-												selectedLabel === opt.value
-													? 'text-secondary'
-													: 'text-gray-500 dark:text-gray-400'
+											className={`flex-1 flex-row items-center justify-center py-3 px-2 rounded-xl gap-1 ${
+												isActive
+													? `bg-primary`
+													: isDark
+														? 'bg-[#262626]'
+														: 'bg-gray-100'
 											}`}
+											activeOpacity={0.7}
 										>
-											{opt.label}
-										</Text>
-									</TouchableOpacity>
-								))}
+											<Ionicons
+												name={opt.icon as any}
+												size={16}
+												color={
+													isActive
+														? '#231F20'
+														: accentColor
+												}
+											/>
+											<Text
+												className={`text-xs font-bold ${
+													isActive
+														? 'text-secondary'
+														: 'text-gray-500 dark:text-gray-400'
+												}`}
+											>
+												{opt.label}
+											</Text>
+										</TouchableOpacity>
+									);
+								})}
 							</View>
 
 							<Input

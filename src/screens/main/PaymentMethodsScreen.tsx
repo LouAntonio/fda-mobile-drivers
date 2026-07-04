@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
 	View,
 	Text,
 	ScrollView,
 	TouchableOpacity,
-	Modal,
-	Pressable,
-	Platform,
-	KeyboardAvoidingView,
-	TouchableWithoutFeedback,
-	Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -20,8 +14,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../hooks/useThemeColors';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
 
 const INITIAL_METHODS: Array<{
 	id: string;
@@ -46,37 +38,7 @@ const INITIAL_METHODS: Array<{
 export default function PaymentMethodsScreen() {
 	const navigation = useNavigation();
 	const { themeColors, isDark } = useThemeColors();
-	const [methods, setMethods] = useState(INITIAL_METHODS);
-	const [showAddModal, setShowAddModal] = useState(false);
-	const [newPhone, setNewPhone] = useState('');
-
-	const handleAdd = () => {
-		if (!newPhone) return;
-		const formattedPhone = newPhone.startsWith('+244')
-			? newPhone
-			: `+244 ${newPhone}`;
-
-		setMethods([
-			...methods,
-			{
-				id: String(Date.now()),
-				type: 'multicaixa',
-				label: 'Multicaixa Express',
-				icon: 'phone' as const,
-				details: formattedPhone,
-				isDefault: false,
-				isRemovable: true,
-			},
-		]);
-		setNewPhone('');
-		setShowAddModal(false);
-	};
-
-	const handleDelete = (id: string) => {
-		setMethods(methods.filter((m) => m.id !== id));
-	};
-
-	const hasMulticaixa = methods.some((m) => m.type === 'multicaixa');
+	const hasMulticaixa = false;
 
 	return (
 		<SafeAreaView
@@ -130,7 +92,7 @@ export default function PaymentMethodsScreen() {
 
 				{/* Cards */}
 				<View className="gap-5">
-					{methods.map((method, index) => (
+					{INITIAL_METHODS.map((method, index) => (
 						<Animated.View
 							key={method.id}
 							entering={FadeInRight.duration(500).delay(
@@ -172,11 +134,7 @@ export default function PaymentMethodsScreen() {
 											<View className="flex-row items-center">
 												{method.isRemovable && (
 													<TouchableOpacity
-														onPress={() =>
-															handleDelete(
-																method.id,
-															)
-														}
+														onPress={() => {}}
 														className="w-11 h-11 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20"
 														activeOpacity={0.7}
 													>
@@ -283,46 +241,48 @@ export default function PaymentMethodsScreen() {
 					))}
 				</View>
 
-				{/* Add New Method Button */}
+				{/* Express Coming Soon */}
 				{!hasMulticaixa && (
 					<Animated.View
 						entering={FadeInUp.duration(600).delay(200)}
 						className="mt-8"
 					>
-						<TouchableOpacity
-							onPress={() => setShowAddModal(true)}
-							className={`p-6 rounded-3xl border-2 border-dashed ${isDark ? 'border-gray-700 bg-[#1A1A1A]/50' : 'border-gray-300 bg-gray-50'}`}
-							activeOpacity={0.6}
+						<View
+							className={`p-6 rounded-3xl border ${isDark ? 'border-primary/20 bg-primary/5' : 'border-primary/30 bg-primary/5'}`}
 						>
-							<View className="flex-row items-center justify-center gap-4">
+							<View className="flex-row items-center gap-4">
 								<View
-									className="w-12 h-12 rounded-full items-center justify-center"
+									className="w-14 h-14 rounded-2xl items-center justify-center"
 									style={{
 										backgroundColor: themeColors.primary,
 									}}
 								>
 									<Ionicons
-										name="add"
-										size={28}
-										color="#000"
+										name="time-outline"
+										size={30}
+										color="#231F20"
 									/>
 								</View>
-								<View>
+								<View className="flex-1">
 									<Text
 										className="text-base font-bold"
 										style={{ color: themeColors.text }}
 									>
-										Adicionar Multicaixa
+										Multicaixa Express
 									</Text>
 									<Text
-										className="text-sm"
-										style={{ color: themeColors.secondary }}
+										className="text-sm font-medium mt-1"
+										style={{ color: themeColors.primary }}
 									>
-										Associe seu número Express
+										Disponível em breve
+									</Text>
+									<Text className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+										Estamos a trabalhar para trazer esta
+										funcionalidade em breve.
 									</Text>
 								</View>
 							</View>
-						</TouchableOpacity>
+						</View>
 					</Animated.View>
 				)}
 
@@ -346,99 +306,7 @@ export default function PaymentMethodsScreen() {
 				</Animated.View>
 			</ScrollView>
 
-			{/* Add Multicaixa Modal */}
-			<Modal
-				visible={showAddModal}
-				animationType="fade"
-				transparent
-				onRequestClose={() => setShowAddModal(false)}
-			>
-				<KeyboardAvoidingView
-					behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-					className="flex-1 justify-end"
-				>
-					<Pressable
-						className="absolute inset-0 bg-black/60"
-						onPress={() => setShowAddModal(false)}
-					/>
-					<Animated.View
-						entering={FadeInDown.duration(400).springify()}
-					>
-						<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-							<View
-								className={`rounded-t-[40px] px-6 pt-4 pb-10 ${isDark ? 'bg-[#1C1C1E]' : 'bg-white shadow-2xl'}`}
-							>
-								{/* Handle */}
-								<View className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full self-center mb-6" />
 
-								<View className="flex-row items-center justify-between mb-8">
-									<View>
-										<Text
-											className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}
-										>
-											Multicaixa Express
-										</Text>
-										<Text
-											className="text-sm mt-1"
-											style={{
-												color: themeColors.secondary,
-											}}
-										>
-											Insira o número associado
-										</Text>
-									</View>
-									<TouchableOpacity
-										onPress={() => setShowAddModal(false)}
-										className="w-10 h-10 items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full"
-										activeOpacity={0.6}
-									>
-										<Ionicons
-											name="close"
-											size={24}
-											color={isDark ? '#FFF' : '#000'}
-										/>
-									</TouchableOpacity>
-								</View>
-
-								<View className="flex-row items-center justify-center mb-8">
-									<View
-										className="w-24 h-24 rounded-[32px] items-center justify-center shadow-lg"
-										// eslint-disable-next-line react-native/no-inline-styles
-										style={{
-											backgroundColor:
-												themeColors.primary,
-											shadowColor: themeColors.primary,
-											elevation: 10,
-										}}
-									>
-										<MaterialCommunityIcons
-											name="cellphone-nfc"
-											size={48}
-											color="#000"
-										/>
-									</View>
-								</View>
-
-								<View className="mb-6">
-									<Input
-										label="Número de telefone"
-										value={newPhone}
-										onChangeText={setNewPhone}
-										placeholder="923 456 789"
-										keyboardType="phone-pad"
-										maxLength={9}
-									/>
-								</View>
-
-								<Button
-									title="Vincular Multicaixa"
-									onPress={handleAdd}
-								/>
-							</View>
-						</TouchableWithoutFeedback>
-					</Animated.View>
-				</KeyboardAvoidingView>
-			</Modal>
 		</SafeAreaView>
 	);
 }
