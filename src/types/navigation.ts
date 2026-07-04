@@ -12,20 +12,14 @@ export type MainStackParamList = {
 	Home: undefined;
 	Profile: undefined;
 	History: undefined;
-	Addresses: undefined;
-	PaymentMethods: undefined;
-	Promotions: undefined;
 	Info: undefined;
 	Contact: undefined;
 	Settings: undefined;
-	TripRequest: {
-		serviceType: 'RIDE' | 'DELIVERY';
-		pickupLat?: number;
-		pickupLng?: number;
-		pickupAddress?: string;
-	};
 	ActiveTrip: { tripId: string };
 	TripDetail: { tripId: string };
+	DriverEarnings: undefined;
+	DriverDocuments: undefined;
+	DriverVehicle: undefined;
 };
 
 export type RootStackParamList = {

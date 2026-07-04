@@ -188,39 +188,39 @@ export default function SideMenu({
 								onClose();
 							}}
 						/>
-						<DrawerItem
-							icon="location-outline"
-							label="Endereços"
-							color={themeColors.text}
-							delay={200}
-							onPress={() => {
-								navigation.navigate('Addresses' as never);
-								onClose();
-							}}
-						/>
 
 						<View style={[styles.drawerDivider, dividerStyle]} />
 						<SectionHeader
-							title="Pagamentos"
+							title="Ganhos"
 							color={themeColors.secondary}
 						/>
 						<DrawerItem
-							icon="card-outline"
-							label="Métodos de Pagamento"
+							icon="wallet-outline"
+							label="Meus Ganhos"
 							color={themeColors.text}
-							delay={300}
+							delay={200}
 							onPress={() => {
-								navigation.navigate('PaymentMethods' as never);
+								navigation.navigate('DriverEarnings' as never);
 								onClose();
 							}}
 						/>
 						<DrawerItem
-							icon="pricetag-outline"
-							label="Promoções"
+							icon="car-outline"
+							label="Meu Veículo"
+							color={themeColors.text}
+							delay={300}
+							onPress={() => {
+								navigation.navigate('DriverVehicle' as never);
+								onClose();
+							}}
+						/>
+						<DrawerItem
+							icon="document-text-outline"
+							label="Documentos"
 							color={themeColors.text}
 							delay={400}
 							onPress={() => {
-								navigation.navigate('Promotions' as never);
+								navigation.navigate('DriverDocuments' as never);
 								onClose();
 							}}
 						/>

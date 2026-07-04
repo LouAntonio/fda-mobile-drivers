@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import type { Coords, TripStatus, ServiceType, PaymentMethod } from '../types/api';
+import type { Coords, TripStatus, ServiceType, PaymentMethod, DeliveryStatus } from '../types/api';
 
 export interface TripFromApi {
 	id: string;
@@ -196,6 +196,23 @@ export async function cancelTrip(id: string, cancelReason: string): Promise<Trip
 export async function fetchTripEvents(id: string): Promise<TripEventFromApi[]> {
 	const { data } = await api.get(`/trips/${id}/events`);
 	return data as TripEventFromApi[];
+}
+
+export async function updateTripStatus(
+	id: string,
+	status: TripStatus,
+	cancelReason?: string,
+): Promise<TripFromApi> {
+	const { data } = await api.patch(`/trips/${id}/status`, { status, cancelReason });
+	return data as TripFromApi;
+}
+
+export async function updateDeliveryStatus(
+	id: string,
+	deliveryStatus: DeliveryStatus,
+): Promise<TripFromApi> {
+	const { data } = await api.patch(`/trips/${id}/delivery-status`, { deliveryStatus });
+	return data as TripFromApi;
 }
 
 export async function openDispute(payload: DisputePayload): Promise<void> {

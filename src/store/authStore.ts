@@ -18,6 +18,15 @@ export type User = {
 	emergencyContactPhone?: string | null;
 	createdAt?: string;
 	updatedAt?: string;
+	driverProfile?: {
+		id: string;
+		complianceStatus: string;
+		availability: string;
+		availableBalance: number;
+		pendingBalance: number;
+		ratingAverage: number;
+		completedTripsCount: number;
+	} | null;
 };
 
 type AuthState = {

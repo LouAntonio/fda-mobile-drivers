@@ -9,11 +9,14 @@ import {
 	cancelTrip,
 	fetchTripEvents,
 	openDispute,
+	updateTripStatus,
+	updateDeliveryStatus,
 	type ListTripsFilters,
 	type EstimateTripPayload,
 	type CreateTripPayload,
 } from '../api/trip';
 import { tripKeys } from '../lib/queryKeys';
+import type { TripStatus, DeliveryStatus } from '../types/api';
 
 export function useTrips(filters: ListTripsFilters = {}) {
 	return useInfiniteQuery({
@@ -94,6 +97,44 @@ export function useCancelTrip() {
 				'Erro',
 				err.response?.data?.msg || 'Erro ao cancelar viagem',
 			);
+		},
+	});
+}
+
+export function useUpdateTripStatus() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			id,
+			status,
+			cancelReason,
+		}: {
+			id: string;
+			status: TripStatus;
+			cancelReason?: string;
+		}) => updateTripStatus(id, status, cancelReason),
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: tripKeys.detail(data.id) });
+			queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
+		},
+		onError: (err: AxiosError<{ msg?: string }>) => {
+			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao atualizar status');
+		},
+	});
+}
+
+export function useUpdateDeliveryStatus() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ id, deliveryStatus }: { id: string; deliveryStatus: DeliveryStatus }) =>
+			updateDeliveryStatus(id, deliveryStatus),
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: tripKeys.detail(data.id) });
+		},
+		onError: (err: AxiosError<{ msg?: string }>) => {
+			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao atualizar entrega');
 		},
 	});
 }
