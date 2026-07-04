@@ -7,8 +7,16 @@ export function useMapSearch() {
 	const [results, setResults] = useState<MapboxFeature[]>([]);
 	const [isSearching, setIsSearching] = useState(false);
 	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const pausedRef = useRef(false);
 
 	useEffect(() => {
+		if (pausedRef.current) {
+			pausedRef.current = false;
+			setResults([]);
+			setIsSearching(false);
+			return;
+		}
+
 		if (timerRef.current) {
 			clearTimeout(timerRef.current);
 		}
@@ -45,8 +53,13 @@ export function useMapSearch() {
 		results,
 		isSearching,
 		clearResults: () => {
+			if (timerRef.current) {
+				clearTimeout(timerRef.current);
+				timerRef.current = null;
+			}
+			pausedRef.current = true;
 			setResults([]);
-			setQuery('');
+			setIsSearching(false);
 		},
 	};
 }

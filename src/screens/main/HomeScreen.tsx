@@ -6,7 +6,6 @@ import {
 	Image,
 	StyleSheet,
 	ScrollView,
-	TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -14,9 +13,6 @@ import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useAuthStore } from '../../store/authStore';
-import { useMapSearch } from '../../hooks/useMapSearch';
-import { useMapRoute } from '../../hooks/useMapRoute';
-import MapView from '../../components/MapView';
 import SideMenu from '../../components/SideMenu';
 
 export default function HomeScreen() {
@@ -24,17 +20,6 @@ export default function HomeScreen() {
 	const { themeColors, isDark } = useThemeColors();
 	const user = useAuthStore((state) => state.user);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	const [showMap, setShowMap] = useState(false);
-	const [selectedDest, setSelectedDest] = useState<{
-		longitude: number;
-		latitude: number;
-		name: string;
-	} | null>(null);
-
-	const { query, setQuery, results, isSearching, clearResults } =
-		useMapSearch();
-	const { route, clearRoute } =
-		useMapRoute();
 
 	const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -72,26 +57,17 @@ export default function HomeScreen() {
 		},
 	];
 
-	const handleSelectDestination = (
+	const handleRecentDestination = (
 		longitude: number,
 		latitude: number,
 		name: string,
 	) => {
-		setSelectedDest({ longitude, latitude, name });
-		setShowMap(true);
-		setQuery(name);
-		clearResults();
-
-		if (route) {
-			clearRoute();
-		}
-	};
-
-	const handleSearchResult = (item: {
-		center: [number, number];
-		place_name: string;
-	}) => {
-		handleSelectDestination(item.center[0], item.center[1] as number, item.place_name);
+		navigation.navigate('TripRequest', {
+			serviceType: 'RIDE',
+			pickupLat: latitude,
+			pickupLng: longitude,
+			pickupAddress: name,
+		});
 	};
 
 	return (
@@ -133,66 +109,7 @@ export default function HomeScreen() {
 				</TouchableOpacity>
 			</View>
 
-			{showMap ? (
-				<View style={styles.mapContainer}>
-					<View style={styles.mapHeader}>
-						<TouchableOpacity
-							onPress={() => {
-								setShowMap(false);
-								clearRoute();
-							}}
-							style={styles.mapBackButton}
-						>
-							<Ionicons name="arrow-back" size={24} color="#000" />
-						</TouchableOpacity>
-						<Text style={styles.mapTitle} numberOfLines={1}>
-							{selectedDest?.name || 'Destino'}
-						</Text>
-					</View>
-					<MapView
-						style={styles.map}
-						initialRegion={
-							selectedDest
-								? {
-										latitude: selectedDest.latitude,
-										longitude: selectedDest.longitude,
-										latitudeDelta: 0.02,
-										longitudeDelta: 0.02,
-									}
-								: undefined
-						}
-						markers={
-							selectedDest
-								? [
-										{
-											id: 'dest',
-											latitude: selectedDest.latitude,
-											longitude: selectedDest.longitude,
-											title: selectedDest.name,
-										},
-									]
-								: []
-						}
-						routeCoords={
-							route?.geometry.coordinates.map(
-								([lng, lat]) => ({
-									latitude: lat,
-									longitude: lng,
-								}),
-							) ?? []
-						}
-					/>
-					{route && (
-						<View style={styles.routeInfo}>
-							<Text style={styles.routeInfoText}>
-								{(route.distance / 1000).toFixed(1)} km ·{' '}
-								{Math.round(route.duration / 60)} min
-							</Text>
-						</View>
-					)}
-				</View>
-			) : (
-				<ScrollView
+			<ScrollView
 					contentContainerStyle={styles.scrollContent}
 					showsVerticalScrollIndicator={false}
 				>
@@ -217,76 +134,6 @@ export default function HomeScreen() {
 							Para onde vamos?
 						</Text>
 
-						<View
-							style={[
-								styles.searchBar,
-								{
-									backgroundColor: isDark
-										? '#1A1A1A'
-										: '#FFFFFF',
-								},
-							]}
-						>
-							<View
-								style={[
-									styles.searchIconContainer,
-									{ backgroundColor: themeColors.primary },
-								]}
-							>
-								<Ionicons name="search" size={20} color="#000" />
-							</View>
-							<TextInput
-								style={[
-									styles.searchText,
-									{ color: themeColors.text },
-								]}
-								placeholder="Insira o destino..."
-								placeholderTextColor={themeColors.secondary}
-								value={query}
-								onChangeText={setQuery}
-							/>
-							{isSearching && (
-								<Text style={styles.searchingText}>
-									Buscando...
-								</Text>
-							)}
-						</View>
-
-						{results.length > 0 && (
-							<View
-								style={[
-									styles.searchResults,
-									{
-										backgroundColor: isDark
-											? '#1A1A1A'
-											: '#FFFFFF',
-									},
-								]}
-							>
-								{results.map((item) => (
-									<TouchableOpacity
-										key={item.id}
-										style={styles.searchResultItem}
-										onPress={() => handleSearchResult(item)}
-									>
-										<Ionicons
-											name="location-outline"
-											size={18}
-											color={themeColors.primary}
-										/>
-										<Text
-											style={[
-												styles.searchResultText,
-												{ color: themeColors.text },
-											]}
-											numberOfLines={2}
-										>
-											{item.place_name}
-										</Text>
-									</TouchableOpacity>
-								))}
-							</View>
-						)}
 					</Animated.View>
 
 					<View style={styles.cardsContainer}>
@@ -426,7 +273,7 @@ export default function HomeScreen() {
 								style={styles.recentItem}
 								activeOpacity={0.6}
 								onPress={() =>
-									handleSelectDestination(
+									handleRecentDestination(
 										item.longitude,
 										item.latitude,
 										item.address,
@@ -476,7 +323,6 @@ export default function HomeScreen() {
 						))}
 					</Animated.View>
 				</ScrollView>
-			)}
 		</SafeAreaView>
 	);
 }
@@ -530,65 +376,7 @@ const styles = StyleSheet.create({
 		letterSpacing: -1,
 		marginBottom: 20,
 	},
-	searchBar: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		padding: 12,
-		borderRadius: 22,
-		height: 64,
-		elevation: 8,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 10 },
-		shadowOpacity: 0.08,
-		shadowRadius: 20,
-		borderWidth: 1,
-		borderColor: 'rgba(150,150,150,0.1)',
-		zIndex: 20,
-	},
-	searchIconContainer: {
-		width: 40,
-		height: 40,
-		borderRadius: 12,
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginRight: 15,
-	},
-	searchText: {
-		flex: 1,
-		fontSize: 16,
-		fontWeight: '600',
-	},
-	searchingText: {
-		fontSize: 12,
-		color: '#9CA3AF',
-		marginRight: 8,
-	},
-	searchResults: {
-		borderRadius: 16,
-		marginTop: 8,
-		elevation: 6,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.1,
-		shadowRadius: 8,
-		maxHeight: 250,
-		overflow: 'hidden',
-		zIndex: 30,
-	},
-	searchResultItem: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		paddingVertical: 14,
-		paddingHorizontal: 16,
-		borderBottomWidth: 0.5,
-		borderBottomColor: 'rgba(150,150,150,0.15)',
-		gap: 12,
-	},
-	searchResultText: {
-		fontSize: 14,
-		fontWeight: '500',
-		flex: 1,
-	},
+
 	cardsContainer: {
 		paddingHorizontal: 20,
 		marginBottom: 35,
@@ -680,49 +468,5 @@ const styles = StyleSheet.create({
 		fontWeight: '400',
 		opacity: 0.6,
 	},
-	mapContainer: {
-		flex: 1,
-	},
-	mapHeader: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		gap: 12,
-		backgroundColor: '#FFD700',
-	},
-	mapBackButton: {
-		width: 36,
-		height: 36,
-		borderRadius: 18,
-		backgroundColor: 'rgba(0,0,0,0.1)',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	mapTitle: {
-		fontSize: 16,
-		fontWeight: '700',
-		color: '#231F20',
-		flex: 1,
-	},
-	map: {
-		flex: 1,
-		width: '100%',
-		height: '100%',
-	},
-	routeInfo: {
-		position: 'absolute',
-		bottom: 30,
-		left: 20,
-		right: 20,
-		backgroundColor: '#231F20',
-		borderRadius: 16,
-		padding: 16,
-		alignItems: 'center',
-	},
-	routeInfoText: {
-		color: '#FFD700',
-		fontSize: 16,
-		fontWeight: '700',
-	},
+
 });
