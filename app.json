@@ -1,10 +1,10 @@
 {
 	"expo": {
-		"name": "Flash Delivery Angola",
-		"slug": "Flash-Delivery-Angola",
+		"name": "FDA-Drivers",
+		"slug": "fda-drivers",
 		"owner": "ft_lantonio",
 		"version": "1.0.0",
-		"scheme": "flash-delivery-angola",
+		"scheme": "fda-drivers",
 		"orientation": "portrait",
 		"icon": "./assets/images/logo.png",
 		"userInterfaceStyle": "automatic",
