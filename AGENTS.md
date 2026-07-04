@@ -3,7 +3,7 @@
 ## Project
 
 - Expo (SDK ~54) + React Native 0.81.5 + React 19.1.0 + TypeScript ~5.9.2
-- App name: `flash-delivery-angola`
+- App name: `Flash-Delivery-Angola`
 - New architecture enabled (`newArchEnabled: true` in app.json)
 - Single-package app (not a monorepo)
 

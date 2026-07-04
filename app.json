@@ -1,7 +1,8 @@
 {
 	"expo": {
 		"name": "Flash Delivery Angola",
-		"slug": "flash-delivery-angola",
+		"slug": "Flash-Delivery-Angola",
+		"owner": "ft_lantonio",
 		"version": "1.0.0",
 		"scheme": "flash-delivery-angola",
 		"orientation": "portrait",
