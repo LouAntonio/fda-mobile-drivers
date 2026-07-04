@@ -12,6 +12,7 @@ import {
 	Pressable,
 	Keyboard,
 	TouchableWithoutFeedback,
+	ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -27,7 +28,8 @@ import { useAuthStore } from '../../store/authStore';
 import { ProfileHeader } from '../../components/profile/ProfileHeader';
 import { StatCard } from '../../components/profile/StatCard';
 import { TripCard, TripItem } from '../../components/profile/TripCard';
-import { fetchProfile, type ProfileStats } from '../../api/profile';
+import { fetchProfile } from '../../api/profile';
+import { fetchProfileStats, type ProfileStats } from '../../api/stats';
 import { useTrips } from '../../hooks/useTrips';
 import { logoutUser } from '../../services/auth';
 import { updateProfile } from '../../services/user';
@@ -48,6 +50,11 @@ export default function ProfileScreen() {
 		queryFn: fetchProfile,
 	});
 
+	const statsQuery = useQuery({
+		queryKey: ['profile', 'stats'],
+		queryFn: fetchProfileStats,
+	});
+
 	const {
 		data: tripsData,
 		isLoading: tripsLoading,
@@ -61,6 +68,7 @@ export default function ProfileScreen() {
 				setUser(data.data as any);
 			}
 			profileQuery.refetch();
+			statsQuery.refetch();
 			setShowEditModal(false);
 			Alert.alert('Sucesso', 'Perfil atualizado!');
 		},
@@ -98,7 +106,8 @@ export default function ProfileScreen() {
 
 	const onRefresh = useCallback(() => {
 		profileQuery.refetch();
-	}, [profileQuery]);
+		statsQuery.refetch();
+	}, [profileQuery, statsQuery]);
 
 	const handleEditPress = () => {
 		const user = profileQuery.data?.user;
@@ -115,10 +124,10 @@ export default function ProfileScreen() {
 		updateMutation.mutate({ name: editName, surname: editSurname });
 	};
 
-	const isLoading = profileQuery.isLoading || tripsLoading;
+	const isLoading = profileQuery.isLoading || tripsLoading || statsQuery.isLoading;
 	const error = profileQuery.error;
 	const user = profileQuery.data?.user;
-	const stats: ProfileStats | undefined = profileQuery.data?.stats;
+	const stats: ProfileStats | undefined = statsQuery.data?.stats;
 
 	const trips: TripItem[] = (tripsData?.pages?.[0]?.trips ?? []).map((t) => ({
 		...t,

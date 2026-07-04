@@ -11,6 +11,7 @@ import {
 	Platform,
 	Keyboard,
 	TouchableWithoutFeedback,
+	ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +20,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
+import { useMutation } from '@tanstack/react-query';
+import { sendContactMessage } from '../../api/support';
 
 const SUPPORT_CHANNELS = [
 	{
@@ -73,19 +76,37 @@ export default function ContactScreen() {
 		backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
 	};
 
+	const contactMutation = useMutation({
+		mutationFn: sendContactMessage,
+		onSuccess: () => {
+			Alert.alert(
+				'Mensagem Enviada',
+				'Recebemos sua mensagem e responderemos em breve.',
+			);
+			setName('');
+			setEmail('');
+			setPhone('');
+			setMessage('');
+		},
+		onError: () => {
+			Alert.alert(
+				'Erro',
+				'Não foi possível enviar a mensagem. Tenta novamente mais tarde.',
+			);
+		},
+	});
+
 	const handleSend = () => {
-		if (!name || !email || !phone || !message) {
-			Alert.alert('Atenção', 'Preencha todos os campos.');
+		if (!name || !message) {
+			Alert.alert('Atenção', 'Preenche o nome e a mensagem.');
 			return;
 		}
-		Alert.alert(
-			'Mensagem Enviada',
-			'Recebemos sua mensagem e responderemos em breve.',
-		);
-		setName('');
-		setEmail('');
-		setPhone('');
-		setMessage('');
+		contactMutation.mutate({
+			name,
+			email: email || undefined,
+			phone: phone || undefined,
+			message,
+		});
 	};
 
 	const handleContact = (channel: string) => {
@@ -387,11 +408,12 @@ export default function ContactScreen() {
 										numberOfLines={5}
 										leftIcon="chatbox-outline"
 									/>
-									<Button
-										title="Enviar Mensagem"
-										onPress={handleSend}
-										className="mt-2"
-									/>
+								<Button
+									title={contactMutation.isPending ? 'A enviar...' : 'Enviar Mensagem'}
+									onPress={handleSend}
+									className="mt-2"
+									disabled={contactMutation.isPending}
+								/>
 								</View>
 							</Animated.View>
 						</View>

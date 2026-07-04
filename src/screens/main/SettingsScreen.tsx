@@ -7,6 +7,11 @@ import {
 	TouchableOpacity,
 	Switch,
 	Alert,
+	TextInput,
+	Modal,
+	Pressable,
+	KeyboardAvoidingView,
+	Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +19,9 @@ import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useThemeStore } from '../../store/themeStore';
+import { useMutation } from '@tanstack/react-query';
+import { deleteAccount } from '../../api/account';
+import { useAuthStore } from '../../store/authStore';
 
 export default function SettingsScreen() {
 	const navigation = useNavigation();
@@ -42,15 +50,33 @@ export default function SettingsScreen() {
 		},
 	];
 
+	const logout = useAuthStore((state) => state.logout);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [deletePassword, setDeletePassword] = useState('');
+
+	const deleteMutation = useMutation({
+		mutationFn: (password?: string) => deleteAccount(password),
+		onSuccess: () => {
+			logout();
+			(navigation as any).reset({
+				index: 0,
+				routes: [{ name: 'Auth' }],
+			});
+		},
+		onError: (err: any) => {
+			const msg =
+				err?.response?.data?.msg || 'Erro ao eliminar conta. Tenta novamente.';
+			Alert.alert('Erro', msg);
+		},
+	});
+
 	const handleDeleteAccount = () => {
-		Alert.alert(
-			'Excluir Conta',
-			'Esta ação é irreversível. Todos os seus dados serão removidos permanentemente.',
-			[
-				{ text: 'Cancelar', style: 'cancel' },
-				{ text: 'Excluir', style: 'destructive' },
-			],
-		);
+		setShowDeleteModal(true);
+	};
+
+	const handleConfirmDelete = () => {
+		setShowDeleteModal(false);
+		deleteMutation.mutate(deletePassword || undefined);
 	};
 
 	return (
@@ -285,6 +311,105 @@ export default function SettingsScreen() {
 					</Text>
 				</Animated.View>
 			</ScrollView>
+
+			{/* Delete Account Modal */}
+			<Modal
+				visible={showDeleteModal}
+				animationType="fade"
+				transparent
+				onRequestClose={() => setShowDeleteModal(false)}
+			>
+				<KeyboardAvoidingView
+					behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+					className="flex-1 justify-center"
+				>
+					<Pressable
+						className="absolute inset-0 bg-black/60"
+						onPress={() => setShowDeleteModal(false)}
+					/>
+					<Animated.View entering={FadeInDown.duration(300).springify()}>
+						<View
+							className="mx-6 rounded-[32px] p-6"
+							style={{
+								backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+							}}
+						>
+							<View className="items-center mb-6">
+								<View className="w-16 h-16 rounded-full bg-red-500/10 items-center justify-center mb-4">
+									<Ionicons
+										name="warning-outline"
+										size={32}
+										color="#EF4444"
+									/>
+								</View>
+								<Text
+									className="text-xl font-black text-center"
+									style={{ color: themeColors.text }}
+								>
+									Eliminar Conta
+								</Text>
+								<Text
+									className="text-sm text-center mt-2"
+									style={{ color: themeColors.text + '99' }}
+								>
+									Esta ação é irreversível. Todos os teus dados
+									serão removidos permanentemente.
+								</Text>
+							</View>
+
+							<TextInput
+								className="w-full px-4 py-3.5 rounded-2xl mb-4 text-base"
+								placeholder="Palavra-passe (se tiveres)"
+								placeholderTextColor="#9CA3AF"
+								secureTextEntry
+								value={deletePassword}
+								onChangeText={setDeletePassword}
+								style={{
+									backgroundColor: isDark
+										? '#2C2C2E'
+										: '#F5F5F5',
+									color: themeColors.text,
+								}}
+							/>
+
+							<View className="flex-row gap-3">
+								<TouchableOpacity
+									className="flex-1 py-3.5 rounded-2xl"
+									style={{
+										backgroundColor: isDark
+											? '#2C2C2E'
+											: '#F5F5F5',
+									}}
+									onPress={() => {
+										setShowDeleteModal(false);
+										setDeletePassword('');
+									}}
+									activeOpacity={0.7}
+								>
+									<Text
+										className="text-center font-bold"
+										style={{ color: themeColors.text }}
+									>
+										Cancelar
+									</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									className="flex-1 py-3.5 rounded-2xl"
+									style={{ backgroundColor: '#EF4444' }}
+									onPress={handleConfirmDelete}
+									activeOpacity={0.7}
+								>
+									<Text className="text-center font-bold text-white">
+										{deleteMutation.isPending
+											? 'A eliminar...'
+											: 'Eliminar'}
+									</Text>
+								</TouchableOpacity>
+							</View>
+						</View>
+					</Animated.View>
+				</KeyboardAvoidingView>
+			</Modal>
 		</SafeAreaView>
 	);
 }

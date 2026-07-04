@@ -1,59 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
 	View,
 	Text,
 	ScrollView,
 	StyleSheet,
 	TouchableOpacity,
+	ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { useQuery } from '@tanstack/react-query';
+import { fetchActivePromotions, type Promotion } from '../../api/promotions';
 
-const MOCK_PROMOTIONS = [
-	{
-		id: '1',
-		title: 'Primeira Viagem',
-		description: 'Até 500 Kz de desconto na sua primeira corrida',
-		code: 'FLASH2026',
-		discount: '500 Kz',
-		expiry: '30 Jun 2026',
-		active: true,
-		type: 'ride',
-	},
-	{
-		id: '2',
-		title: 'Entrega 10',
-		description: 'Envie encomendas com 10% de desconto',
-		code: 'ENTREGA10',
-		discount: '10%',
-		expiry: '15 Mai 2026',
-		active: true,
-		type: 'delivery',
-	},
-	{
-		id: '3',
-		title: '20% Off Sexta',
-		description: 'Desconto toda sexta-feira nas corridas',
-		code: 'SEXTA20',
-		discount: '20%',
-		expiry: '31 Dez 2026',
-		active: true,
-		type: 'ride',
-	},
-	{
-		id: '4',
-		title: 'Bem-vindo!',
-		description: '300 Kz de bônus para novos usuários',
-		code: 'BEMVINDO',
-		discount: '300 Kz',
-		expiry: '01 Jan 2026',
-		active: false,
-		type: 'ride',
-	},
-];
+function formatDiscount(promo: Promotion): string {
+	if (promo.discountType === 'PERCENTAGE') {
+		return `${promo.discountValue}%`;
+	}
+	return `${promo.discountValue.toLocaleString('pt-AO')} Kz`;
+}
+
+function formatExpiry(dateStr: string | null): string {
+	if (!dateStr) return 'Sem expiração';
+	const d = new Date(dateStr);
+	return d.toLocaleDateString('pt-PT', {
+		day: '2-digit',
+		month: 'short',
+		year: 'numeric',
+	});
+}
+
+function isExpired(promo: Promotion): boolean {
+	if (!promo.expiresAt) return false;
+	return new Date(promo.expiresAt) < new Date();
+}
 
 export default function PromotionsScreen() {
 	const navigation = useNavigation();
@@ -63,23 +45,72 @@ export default function PromotionsScreen() {
 		'all' | 'ride' | 'delivery'
 	>('all');
 
-	const filters = [
-		{ id: 'all', label: 'Todos', icon: 'layers-outline' },
-		{ id: 'ride', label: 'Corridas', icon: 'car-outline' },
-		{ id: 'delivery', label: 'Entregas', icon: 'cube-outline' },
-	];
-
-	const cardBgStyle = {
-		backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
-	};
-
-	const filteredPromos = MOCK_PROMOTIONS.filter((p) => {
-		if (activeFilter === 'all') return true;
-		return p.type === activeFilter;
+	const { data, isLoading } = useQuery({
+		queryKey: ['promotions', 'active'],
+		queryFn: fetchActivePromotions,
 	});
 
-	const activePromos = filteredPromos.filter((p) => p.active);
-	const expiredPromos = filteredPromos.filter((p) => !p.active);
+	const filters = [
+		{ id: 'all' as const, label: 'Todos', icon: 'layers-outline' },
+		{ id: 'ride' as const, label: 'Corridas', icon: 'car-outline' },
+		{ id: 'delivery' as const, label: 'Entregas', icon: 'cube-outline' },
+	];
+
+	const cardBgStyle = useMemo(
+		() => ({
+			backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
+		}),
+		[isDark],
+	);
+
+	const promotions = data?.promotions ?? [];
+
+	const filteredPromos = promotions.filter((p) => {
+		if (activeFilter === 'all') return true;
+		return p.discountType === 'PERCENTAGE'
+			? activeFilter === 'ride'
+			: true;
+	});
+
+	const activePromos = filteredPromos.filter((p) => !isExpired(p));
+	const expiredPromos = filteredPromos.filter((p) => isExpired(p));
+
+	if (isLoading) {
+		return (
+			<SafeAreaView
+				style={[
+					styles.container,
+					{ backgroundColor: themeColors.background },
+				]}
+			>
+				<View style={styles.header}>
+					<TouchableOpacity
+						onPress={() => navigation.goBack()}
+						style={styles.backButton}
+						activeOpacity={0.7}
+					>
+						<Ionicons
+							name="chevron-back"
+							size={28}
+							color={themeColors.text}
+						/>
+					</TouchableOpacity>
+					<Text
+						style={[
+							styles.headerTitle,
+							{ color: themeColors.text },
+						]}
+					>
+						Promoções
+					</Text>
+					<View style={styles.placeholder} />
+				</View>
+				<View style={styles.loadingContainer}>
+					<ActivityIndicator size="large" color={themeColors.primary} />
+				</View>
+			</SafeAreaView>
+		);
+	}
 
 	return (
 		<SafeAreaView
@@ -88,7 +119,6 @@ export default function PromotionsScreen() {
 				{ backgroundColor: themeColors.background },
 			]}
 		>
-			{/* Header */}
 			<View
 				style={[
 					styles.header,
@@ -123,14 +153,7 @@ export default function PromotionsScreen() {
 						return (
 							<TouchableOpacity
 								key={filter.id}
-								onPress={() =>
-									setActiveFilter(
-										filter.id as
-											| 'all'
-											| 'ride'
-											| 'delivery',
-									)
-								}
+								onPress={() => setActiveFilter(filter.id)}
 								style={[
 									styles.filterPill,
 									isActive
@@ -138,8 +161,7 @@ export default function PromotionsScreen() {
 												backgroundColor:
 													themeColors.primary,
 											}
-										: // eslint-disable-next-line react-native/no-inline-styles
-											{
+										: {
 												backgroundColor: isDark
 													? '#1A1A1A'
 													: '#FFFFFF',
@@ -161,7 +183,6 @@ export default function PromotionsScreen() {
 								<Text
 									style={[
 										styles.filterLabel,
-										// eslint-disable-next-line react-native/no-inline-styles
 										{
 											color: isActive
 												? '#000'
@@ -181,12 +202,29 @@ export default function PromotionsScreen() {
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={false}
 			>
-				{/* Active Promos */}
 				<Text
 					style={[styles.sectionTitle, { color: themeColors.text }]}
 				>
 					Ativas ({activePromos.length})
 				</Text>
+
+				{activePromos.length === 0 && (
+					<View style={styles.emptyState}>
+						<Ionicons
+							name="ticket-outline"
+							size={64}
+							color={themeColors.border}
+						/>
+						<Text
+							style={[
+								styles.emptyText,
+								{ color: themeColors.text + '80' },
+							]}
+						>
+							Nenhuma promoção ativa
+						</Text>
+					</View>
+				)}
 
 				{activePromos.map((promo, index) => (
 					<Animated.View
@@ -199,11 +237,7 @@ export default function PromotionsScreen() {
 								<View style={styles.promoHeader}>
 									<View style={styles.typeBadge}>
 										<Ionicons
-											name={
-												promo.type === 'ride'
-													? 'car'
-													: 'cube'
-											}
+											name="pricetag"
 											size={16}
 											color={themeColors.primary}
 										/>
@@ -213,9 +247,9 @@ export default function PromotionsScreen() {
 												{ color: themeColors.text },
 											]}
 										>
-											{promo.type === 'ride'
-												? 'Corrida'
-												: 'Entrega'}
+											{promo.discountType === 'PERCENTAGE'
+												? 'Percentagem'
+												: 'Valor Fixo'}
 										</Text>
 									</View>
 									<TouchableOpacity
@@ -247,7 +281,7 @@ export default function PromotionsScreen() {
 										]}
 									>
 										<Text style={styles.discountText}>
-											{promo.discount}
+											{formatDiscount(promo)}
 										</Text>
 									</View>
 									<View style={styles.titleContainer}>
@@ -257,7 +291,7 @@ export default function PromotionsScreen() {
 												{ color: themeColors.text },
 											]}
 										>
-											{promo.title}
+											{`${promo.discountValue}${promo.discountType === 'PERCENTAGE' ? '%' : ' Kz'} de desconto`}
 										</Text>
 										<Text
 											numberOfLines={2}
@@ -269,7 +303,7 @@ export default function PromotionsScreen() {
 												},
 											]}
 										>
-											{promo.description}
+											{promo.description ?? 'Aproveita esta promoção'}
 										</Text>
 									</View>
 								</View>
@@ -298,31 +332,13 @@ export default function PromotionsScreen() {
 											{ color: themeColors.secondary },
 										]}
 									>
-										Expira: {promo.expiry}
+										Expira: {formatExpiry(promo.expiresAt)}
 									</Text>
 								</View>
 							</View>
 						</View>
 					</Animated.View>
 				))}
-
-				{activePromos.length === 0 && (
-					<View style={styles.emptyState}>
-						<Ionicons
-							name="ticket-outline"
-							size={64}
-							color={themeColors.border}
-						/>
-						<Text
-							style={[
-								styles.emptyText,
-								{ color: themeColors.text + '80' },
-							]}
-						>
-							Nenhuma promoção ativa para esta categoria
-						</Text>
-					</View>
-				)}
 
 				{/* Expired Toggle */}
 				{expiredPromos.length > 0 && (
@@ -348,7 +364,6 @@ export default function PromotionsScreen() {
 					</TouchableOpacity>
 				)}
 
-				{/* Expired Promos */}
 				{showExpired &&
 					expiredPromos.map((promo, index) => (
 						<Animated.View
@@ -372,7 +387,7 @@ export default function PromotionsScreen() {
 											{ color: themeColors.secondary },
 										]}
 									>
-										{promo.title}
+										{promo.code}
 									</Text>
 									<Text
 										style={[
@@ -380,7 +395,8 @@ export default function PromotionsScreen() {
 											{ color: themeColors.secondary },
 										]}
 									>
-										{promo.code} · Expirou em {promo.expiry}
+										{promo.code} · Expirou em{' '}
+										{formatExpiry(promo.expiresAt)}
 									</Text>
 								</View>
 							</View>
@@ -415,6 +431,11 @@ const styles = StyleSheet.create({
 	},
 	placeholder: {
 		width: 40,
+	},
+	loadingContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 	scrollContent: {
 		paddingHorizontal: 20,

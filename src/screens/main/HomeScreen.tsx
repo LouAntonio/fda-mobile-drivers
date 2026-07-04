@@ -14,6 +14,7 @@ import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useAuthStore } from '../../store/authStore';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
+import { useAddresses } from '../../hooks/useAddresses';
 import SideMenu from '../../components/SideMenu';
 
 export default function HomeScreen() {
@@ -25,6 +26,8 @@ export default function HomeScreen() {
 
 	const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
+	const { addresses } = useAddresses();
+
 	const cardBgStyle = useMemo(
 		() => ({
 			backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
@@ -32,32 +35,14 @@ export default function HomeScreen() {
 		[isDark],
 	);
 
-	const recentDestinations = [
-		{
-			id: '1',
-			title: 'Casa',
-			address: 'Rocha Cabine, Luanda',
-			icon: 'home',
-			latitude: -8.8399,
-			longitude: 13.2344,
-		},
-		{
-			id: '2',
-			title: 'Trabalho',
-			address: 'Edifício Kilamba, Marginal',
-			icon: 'briefcase',
-			latitude: -8.8147,
-			longitude: 13.2306,
-		},
-		{
-			id: '3',
-			title: 'Belas Shopping',
-			address: 'Talatona, Luanda',
-			icon: 'cart',
-			latitude: -8.9107,
-			longitude: 13.2038,
-		},
-	];
+	const recentDestinations = addresses.slice(0, 3).map((addr) => ({
+		id: addr.id,
+		title: addr.customLabel || addr.label,
+		address: addr.address,
+		icon: addr.label === 'HOME' ? 'home' : addr.label === 'WORK' ? 'briefcase' : 'location',
+		latitude: addr.lat,
+		longitude: addr.lng,
+	}));
 
 	const handleRecentDestination = (
 		longitude: number,
