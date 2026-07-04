@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useAuthStore } from '../../store/authStore';
+import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import SideMenu from '../../components/SideMenu';
 
 export default function HomeScreen() {
@@ -20,6 +21,7 @@ export default function HomeScreen() {
 	const { themeColors, isDark } = useThemeColors();
 	const user = useAuthStore((state) => state.user);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const { location: currentLocation } = useCurrentLocation();
 
 	const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -146,6 +148,9 @@ export default function HomeScreen() {
 								onPress={() =>
 									navigation.navigate('TripRequest', {
 										serviceType: 'RIDE',
+										pickupLat: currentLocation?.latitude,
+										pickupLng: currentLocation?.longitude,
+										pickupAddress: currentLocation?.address,
 									})
 								}
 							>
@@ -203,6 +208,9 @@ export default function HomeScreen() {
 								onPress={() =>
 									navigation.navigate('TripRequest', {
 										serviceType: 'DELIVERY',
+										pickupLat: currentLocation?.latitude,
+										pickupLng: currentLocation?.longitude,
+										pickupAddress: currentLocation?.address,
 									})
 								}
 							>

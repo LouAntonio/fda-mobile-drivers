@@ -16,6 +16,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
+import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { useEstimateTrip, useRequestTrip } from '../../hooks/useTrips';
 import { useMapSearch } from '../../hooks/useMapSearch';
 import { useMapRoute } from '../../hooks/useMapRoute';
@@ -27,6 +28,8 @@ export default function TripRequestScreen() {
 	const route = useRoute<RouteProp<MainStackParamList, 'TripRequest'>>();
 	const { themeColors, isDark } = useThemeColors();
 	const { serviceType, pickupLat, pickupLng, pickupAddress: initialPickup } = route.params;
+
+	const { location: currentLocation } = useCurrentLocation();
 
 	const [selectedDropoff, setSelectedDropoff] = useState<{
 		latitude: number;
@@ -43,9 +46,9 @@ export default function TripRequestScreen() {
 	const estimateMutation = useEstimateTrip();
 	const requestMutation = useRequestTrip();
 
-	const userLat = pickupLat ?? -8.8399;
-	const userLng = pickupLng ?? 13.2344;
-	const userAddress = initialPickup ?? 'Local atual';
+	const userLat = pickupLat ?? currentLocation?.latitude ?? -8.8399;
+	const userLng = pickupLng ?? currentLocation?.longitude ?? 13.2344;
+	const userAddress = initialPickup ?? currentLocation?.address ?? 'Local atual';
 
 	const estimate = estimateMutation.data;
 
