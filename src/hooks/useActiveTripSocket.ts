@@ -50,10 +50,10 @@ export function useActiveTripSocket({
 			});
 		});
 
-		const off3 = socketManager.on('trip:driver_location', (data) => {
-			queryClient.invalidateQueries({
-				queryKey: tripKeys.detail(tripId),
-			});
+		const off3 = socketManager.on('trip:location', (data: { lat: number; lng: number }) => {
+			if (data?.lat && data?.lng) {
+				setClientLocation({ lat: data.lat, lng: data.lng });
+			}
 		});
 
 		const off4 = socketManager.on('trip:delivery_status', () => {

@@ -30,15 +30,13 @@ export function useDriverLocation({ enabled, intervalMs = 10000 }: UseDriverLoca
 
 		intervalRef.current = setInterval(async () => {
 			try {
-				const { AccuracyAuthorization, getCurrentPositionAsync, requestForegroundPermissionsAsync } =
+				const { getCurrentPositionAsync, requestForegroundPermissionsAsync } =
 					await import('expo-location');
 
 				const { status } = await requestForegroundPermissionsAsync();
 				if (status !== 'granted') return;
 
-				const pos = await getCurrentPositionAsync({
-					accuracy: AccuracyAuthorization?.balanced,
-				});
+				const pos = await getCurrentPositionAsync({});
 
 				await sendLocation(pos.coords.latitude, pos.coords.longitude);
 			} catch {

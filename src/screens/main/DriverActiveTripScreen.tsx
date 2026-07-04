@@ -135,7 +135,7 @@ export default function DriverActiveTripScreen() {
 			title: 'Minha posição',
 		});
 	}
-	if (pickupCoords && trip?.status !== 'STARTED') {
+	if (pickupCoords && trip && trip.status !== 'STARTED') {
 		markers.push({
 			id: 'pickup',
 			latitude: pickupCoords.lat,
@@ -143,7 +143,7 @@ export default function DriverActiveTripScreen() {
 			title: trip.pickupAddress,
 		});
 	}
-	if (dropoffCoords && trip?.status === 'STARTED') {
+	if (dropoffCoords && trip && trip.status === 'STARTED') {
 		markers.push({
 			id: 'dropoff',
 			latitude: dropoffCoords.lat,

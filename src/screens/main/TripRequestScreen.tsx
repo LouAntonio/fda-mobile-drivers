@@ -25,9 +25,9 @@ import type { MainStackParamList } from '../../types/navigation';
 
 export default function TripRequestScreen() {
 	const navigation = useNavigation<any>();
-	const route = useRoute<RouteProp<MainStackParamList, 'TripRequest'>>();
+	const route = useRoute<any>();
 	const { themeColors, isDark } = useThemeColors();
-	const { serviceType, pickupLat, pickupLng, pickupAddress: initialPickup } = route.params;
+	const { serviceType, pickupLat, pickupLng, pickupAddress: initialPickup } = route.params || {};
 
 	const { location: currentLocation } = useCurrentLocation();
 

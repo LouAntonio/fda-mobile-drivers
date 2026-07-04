@@ -52,7 +52,7 @@ export default function ActiveTripScreen() {
 
 	const { data: trip, isLoading } = useTrip(tripId);
 	const cancelMutation = useCancelTrip();
-	const { driverLocation } = useActiveTripSocket({ tripId, enabled: true });
+	const { clientLocation: driverLocation } = useActiveTripSocket({ tripId, enabled: true });
 	const { location: currentLocation } = useCurrentLocation();
 	const { route: mapRoute, fetchRoute } = useMapRoute();
 

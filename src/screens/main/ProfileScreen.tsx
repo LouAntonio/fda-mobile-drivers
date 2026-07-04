@@ -26,6 +26,7 @@ import { TripCard, TripItem } from '../../components/profile/TripCard';
 import { ProfileHeaderSkeleton } from '../../components/skeletons/ProfileHeaderSkeleton';
 import { StatCardGridSkeleton } from '../../components/skeletons/StatCardSkeleton';
 import { TripCardSkeleton } from '../../components/skeletons/TripCardSkeleton';
+import { useThemeColors } from '../../hooks/useThemeColors';
 import { useDriverProfile } from '../../hooks/useDriverProfile';
 import { useTrips } from '../../hooks/useTrips';
 import { logoutUser } from '../../services/auth';
@@ -36,6 +37,7 @@ import Button from '../../components/Button';
 
 export default function ProfileScreen() {
 	const navigation = useNavigation<any>();
+	const { themeColors, isDark } = useThemeColors();
 	const logout = useAuthStore((state) => state.logout);
 	const refreshToken = useAuthStore((state) => state.refreshToken);
 	const setUser = useAuthStore((state) => state.setUser);
