@@ -23,7 +23,6 @@ import { AxiosError } from 'axios';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useDriverProfile } from '../../hooks/useDriverProfile';
-import { useTrips } from '../../hooks/useTrips';
 import { logoutUser } from '../../services/auth';
 import { updateProfile, updateEmergencyContact } from '../../services/user';
 import {
@@ -200,7 +199,6 @@ export default function ProfileScreen() {
 		? Math.round(driverProfile.ratingAverage * 10) / 10
 		: 0;
 	const completedTrips = driverProfile?.completedTripsCount ?? 0;
-	const cancelledTrips = driverProfile?.cancelledTripsCount ?? 0;
 	const balance = driverProfile?.availableBalance ?? 0;
 	const complianceStatus = driverProfile?.complianceStatus;
 

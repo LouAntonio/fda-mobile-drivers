@@ -1,0 +1,8 @@
+.agents
+.expo
+.github
+dist
+node_modules
+assets
+android
+ios

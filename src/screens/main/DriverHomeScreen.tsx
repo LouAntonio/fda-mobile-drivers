@@ -50,7 +50,7 @@ function PulseCircle({ isOnline, size }: { isOnline: boolean; size: number }) {
 		} else {
 			pulse.value = withTiming(1, { duration: 300 });
 		}
-	}, [isOnline]);
+	}, [isOnline, pulse]);
 
 	const animatedStyle = useAnimatedStyle(() => ({
 		transform: [{ scale: pulse.value }],

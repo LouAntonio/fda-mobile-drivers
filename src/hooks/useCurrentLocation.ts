@@ -46,7 +46,7 @@ export function useCurrentLocation() {
 					setLocation({ latitude, longitude, address });
 					setLoading(false);
 				}
-			} catch (err) {
+			} catch {
 				if (!cancelled) {
 					setError('Erro ao obter localização');
 					setLoading(false);

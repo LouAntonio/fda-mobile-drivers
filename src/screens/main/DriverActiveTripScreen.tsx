@@ -13,10 +13,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTrip } from '../../hooks/useTrips';
-import {
-	useUpdateTripStatus,
-	useUpdateDeliveryStatus,
-} from '../../hooks/useTrips';
+import { useUpdateTripStatus } from '../../hooks/useTrips';
 import { useActiveTripSocket } from '../../hooks/useActiveTripSocket';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { useDriverLocation } from '../../hooks/useDriverLocation';
@@ -71,7 +68,7 @@ export default function DriverActiveTripScreen() {
 
 	const { data: trip, isLoading } = useTrip(tripId);
 	const statusMutation = useUpdateTripStatus();
-	const { clientLocation } = useActiveTripSocket({ tripId, enabled: true });
+	useActiveTripSocket({ tripId, enabled: true });
 	const { location: currentLocation } = useCurrentLocation();
 	const { route: mapRoute, fetchRoute } = useMapRoute();
 	const isTripActive =
@@ -116,7 +113,14 @@ export default function DriverActiveTripScreen() {
 			}
 			setRouteFetched(true);
 		}
-	}, [trip, currentLocation, pickupCoords, dropoffCoords]);
+	}, [
+		trip,
+		currentLocation,
+		pickupCoords,
+		dropoffCoords,
+		fetchRoute,
+		routeFetched,
+	]);
 
 	const statusConfig = trip
 		? (STATUS_CONFIG[trip.status] ?? STATUS_CONFIG.ACCEPTED)
