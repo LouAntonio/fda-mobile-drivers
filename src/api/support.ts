@@ -7,6 +7,8 @@ export interface ContactPayload {
 	message: string;
 }
 
-export async function sendContactMessage(payload: ContactPayload): Promise<void> {
+export async function sendContactMessage(
+	payload: ContactPayload,
+): Promise<void> {
 	await api.post('/support/contact', payload);
 }

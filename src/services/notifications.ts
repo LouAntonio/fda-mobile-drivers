@@ -14,8 +14,11 @@ Notifications.setNotificationHandler({
 	}),
 });
 
-export async function registerForPushNotificationsAsync(): Promise<string | null> {
-	const { status: existingStatus } = await Notifications.getPermissionsAsync();
+export async function registerForPushNotificationsAsync(): Promise<
+	string | null
+> {
+	const { status: existingStatus } =
+		await Notifications.getPermissionsAsync();
 	let finalStatus = existingStatus;
 
 	if (existingStatus !== 'granted') {
@@ -41,7 +44,8 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
 
 	if (!projectId) return null;
 
-	const pushToken = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+	const pushToken = (await Notifications.getExpoPushTokenAsync({ projectId }))
+		.data;
 	return pushToken;
 }
 

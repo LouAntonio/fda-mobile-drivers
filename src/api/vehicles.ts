@@ -16,7 +16,9 @@ export interface CreateVehiclePayload {
 	photoUrl?: string;
 }
 
-export async function createVehicle(payload: CreateVehiclePayload): Promise<VehicleItem> {
+export async function createVehicle(
+	payload: CreateVehiclePayload,
+): Promise<VehicleItem> {
 	const { data } = await api.post('/vehicles/me', payload);
 	return data as VehicleItem;
 }
@@ -36,5 +38,3 @@ export async function setActiveVehicle(id: string): Promise<void> {
 export async function deleteVehicle(id: string): Promise<void> {
 	await api.delete(`/vehicles/me/${id}`);
 }
-
-

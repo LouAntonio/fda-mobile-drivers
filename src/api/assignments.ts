@@ -14,13 +14,15 @@ export interface TripOffer {
 }
 
 export async function acceptAssignment(id: string): Promise<TripAssignment> {
-	const { data } = await api.patch(`/trip-assignments/${id}`, { status: 'ACCEPTED' as TripAssignmentStatus });
+	const { data } = await api.patch(`/trip-assignments/${id}`, {
+		status: 'ACCEPTED' as TripAssignmentStatus,
+	});
 	return data as TripAssignment;
 }
 
 export async function rejectAssignment(id: string): Promise<TripAssignment> {
-	const { data } = await api.patch(`/trip-assignments/${id}`, { status: 'REJECTED' as TripAssignmentStatus });
+	const { data } = await api.patch(`/trip-assignments/${id}`, {
+		status: 'REJECTED' as TripAssignmentStatus,
+	});
 	return data as TripAssignment;
 }
-
-

@@ -69,8 +69,7 @@ export function TripCard({ trip, onPress }: TripCardProps) {
 	const cfg = statusConfig[trip.status];
 	const serviceIcon =
 		trip.serviceType === 'RIDE' ? 'car-outline' : 'cube-outline';
-	const serviceLabel =
-		trip.serviceType === 'RIDE' ? 'Corrida' : 'Entrega';
+	const serviceLabel = trip.serviceType === 'RIDE' ? 'Corrida' : 'Entrega';
 
 	return (
 		<TouchableOpacity
@@ -85,7 +84,11 @@ export function TripCard({ trip, onPress }: TripCardProps) {
 			<View className="flex-1 p-4">
 				<View className="flex-row items-center justify-between mb-2">
 					<View className="flex-row items-center gap-1.5">
-						<Ionicons name={serviceIcon} size={14} color={cfg.color} />
+						<Ionicons
+							name={serviceIcon}
+							size={14}
+							color={cfg.color}
+						/>
 						<Text className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
 							{serviceLabel}
 						</Text>

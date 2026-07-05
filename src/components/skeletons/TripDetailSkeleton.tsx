@@ -21,7 +21,11 @@ export function TripDetailSkeleton() {
 					<SkeletonBox width={80} height={28} borderRadius={12} />
 				</View>
 
-				<SkeletonBox height={180} borderRadius={24} style={{ marginBottom: 24 }} />
+				<SkeletonBox
+					height={180}
+					borderRadius={24}
+					style={{ marginBottom: 24 }}
+				/>
 
 				<View className="bg-white dark:bg-soft-black rounded-3xl p-5 mb-4">
 					{['60%', '85%', '40%'].map((w, i) => (
@@ -36,7 +40,12 @@ export function TripDetailSkeleton() {
 				</View>
 
 				<View className="bg-white dark:bg-soft-black rounded-3xl p-5 mb-4">
-					<SkeletonBox width="50%" height={16} borderRadius={6} style={{ marginBottom: 16 }} />
+					<SkeletonBox
+						width="50%"
+						height={16}
+						borderRadius={6}
+						style={{ marginBottom: 16 }}
+					/>
 					<View className="flex-row justify-between mb-3">
 						<SkeletonBox width="40%" height={14} borderRadius={6} />
 						<SkeletonBox width="25%" height={14} borderRadius={6} />

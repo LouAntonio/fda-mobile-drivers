@@ -18,7 +18,8 @@ export function useCurrentLocation() {
 
 		(async () => {
 			try {
-				const { status } = await Location.requestForegroundPermissionsAsync();
+				const { status } =
+					await Location.requestForegroundPermissionsAsync();
 				if (status !== 'granted') {
 					if (!cancelled) {
 						setError('Permissão de localização negada');

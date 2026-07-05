@@ -15,9 +15,14 @@ type CreateAddressParams = {
 };
 
 export function createAddress(userId: string, data: CreateAddressParams) {
-	return api.post<ApiResponse<UserAddress>>(`/users/${userId}/addresses`, data);
+	return api.post<ApiResponse<UserAddress>>(
+		`/users/${userId}/addresses`,
+		data,
+	);
 }
 
 export function deleteAddress(userId: string, addressId: string) {
-	return api.delete<ApiResponse<never>>(`/users/${userId}/addresses/${addressId}`);
+	return api.delete<ApiResponse<never>>(
+		`/users/${userId}/addresses/${addressId}`,
+	);
 }

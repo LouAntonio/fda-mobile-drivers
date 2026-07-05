@@ -163,62 +163,65 @@ export default function InfoScreen() {
 										iIndex * 80,
 									)}
 								>
-								<TouchableOpacity
-									style={[
-										styles.itemRow,
-										iIndex <
-											// eslint-disable-next-line react-native/no-inline-styles
-											section.items.length - 1 && {
-											borderBottomColor:
-												themeColors.border,
-											borderBottomWidth: 0.5,
-										},
-									]}
-									activeOpacity={item.url ? 0.6 : 1}
-									disabled={!item.url}
-									onPress={
-										item.url
-											? () => Linking.openURL(item.url!)
-											: undefined
-									}
-								>
-									<View style={styles.itemIconContainer}>
-										<Ionicons
-											name={item.icon as any}
-											size={22}
-											color={themeColors.secondary}
-										/>
-									</View>
-									<View style={styles.itemInfo}>
-										<Text
-											style={[
-												styles.itemLabel,
-												{ color: themeColors.text },
-											]}
-										>
-											{item.label}
-										</Text>
-										{item.value && (
+									<TouchableOpacity
+										style={[
+											styles.itemRow,
+											iIndex <
+												// eslint-disable-next-line react-native/no-inline-styles
+												section.items.length - 1 && {
+												borderBottomColor:
+													themeColors.border,
+												borderBottomWidth: 0.5,
+											},
+										]}
+										activeOpacity={item.url ? 0.6 : 1}
+										disabled={!item.url}
+										onPress={
+											item.url
+												? () =>
+														Linking.openURL(
+															item.url!,
+														)
+												: undefined
+										}
+									>
+										<View style={styles.itemIconContainer}>
+											<Ionicons
+												name={item.icon as any}
+												size={22}
+												color={themeColors.secondary}
+											/>
+										</View>
+										<View style={styles.itemInfo}>
 											<Text
 												style={[
-													styles.itemValue,
-													{
-														color: themeColors.secondary,
-													},
+													styles.itemLabel,
+													{ color: themeColors.text },
 												]}
 											>
-												{item.value}
+												{item.label}
 											</Text>
+											{item.value && (
+												<Text
+													style={[
+														styles.itemValue,
+														{
+															color: themeColors.secondary,
+														},
+													]}
+												>
+													{item.value}
+												</Text>
+											)}
+										</View>
+										{item.url && (
+											<Ionicons
+												name="chevron-forward"
+												size={20}
+												color={themeColors.border}
+											/>
 										)}
-									</View>
-									{item.url && (
-										<Ionicons
-											name="chevron-forward"
-											size={20}
-											color={themeColors.border}
-										/>
-									)}
-								</TouchableOpacity>
+									</TouchableOpacity>
 								</Animated.View>
 							))}
 						</View>

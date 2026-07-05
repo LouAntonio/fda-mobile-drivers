@@ -36,5 +36,8 @@ type EmergencyContactParams = {
 };
 
 export function updateEmergencyContact(data: EmergencyContactParams) {
-	return api.patch<ApiResponse<UserProfile>>('/users/me/emergency-contact', data);
+	return api.patch<ApiResponse<UserProfile>>(
+		'/users/me/emergency-contact',
+		data,
+	);
 }

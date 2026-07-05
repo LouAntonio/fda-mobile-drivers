@@ -28,7 +28,10 @@ export function useCreateVehicle() {
 			Alert.alert('Sucesso', 'Veículo cadastrado com sucesso');
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao cadastrar veículo');
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao cadastrar veículo',
+			);
 		},
 	});
 }
@@ -37,14 +40,22 @@ export function useUpdateVehicle() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({ id, payload }: { id: string; payload: Partial<CreateVehiclePayload> }) =>
-			updateVehicle(id, payload),
+		mutationFn: ({
+			id,
+			payload,
+		}: {
+			id: string;
+			payload: Partial<CreateVehiclePayload>;
+		}) => updateVehicle(id, payload),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['vehicles'] });
 			Alert.alert('Sucesso', 'Veículo atualizado');
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao atualizar veículo');
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao atualizar veículo',
+			);
 		},
 	});
 }

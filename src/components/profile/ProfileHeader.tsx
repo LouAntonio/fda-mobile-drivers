@@ -85,7 +85,11 @@ export function ProfileHeader({
 				</View>
 				{email && (
 					<View className="flex-row items-center">
-						<Ionicons name="mail-outline" size={14} color="#6B7280" />
+						<Ionicons
+							name="mail-outline"
+							size={14}
+							color="#6B7280"
+						/>
 						<Text className="text-sm font-medium text-gray-500 dark:text-gray-400 ml-1.5">
 							{email}
 						</Text>

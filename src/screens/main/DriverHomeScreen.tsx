@@ -26,7 +26,11 @@ import { useAuthStore } from '../../store/authStore';
 import { useDriverProfile } from '../../hooks/useDriverProfile';
 import { useDriverAvailability } from '../../hooks/useDriverAvailability';
 import { useDriverLocation } from '../../hooks/useDriverLocation';
-import { useTripOfferListener, useAcceptAssignment, useRejectAssignment } from '../../hooks/useTripAssignments';
+import {
+	useTripOfferListener,
+	useAcceptAssignment,
+	useRejectAssignment,
+} from '../../hooks/useTripAssignments';
 import SideMenu from '../../components/SideMenu';
 import type { DriverAvailability } from '../../types/api';
 
@@ -77,7 +81,9 @@ function PulseCircle({ isOnline, size }: { isOnline: boolean; size: number }) {
 					size={40}
 					color={isOnline ? '#FFF' : '#6B7280'}
 				/>
-				<Text className={`text-xs font-black mt-1 ${isOnline ? 'text-white' : 'text-gray-400'}`}>
+				<Text
+					className={`text-xs font-black mt-1 ${isOnline ? 'text-white' : 'text-gray-400'}`}
+				>
 					{isOnline ? 'ONLINE' : 'OFFLINE'}
 				</Text>
 			</View>
@@ -91,7 +97,11 @@ export default function DriverHomeScreen() {
 	const user = useAuthStore((state) => state.user);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-	const { data: driverProfile, isLoading: profileLoading, refetch } = useDriverProfile();
+	const {
+		data: driverProfile,
+		isLoading: profileLoading,
+		refetch,
+	} = useDriverProfile();
 	const availabilityMutation = useDriverAvailability();
 	const { currentOffer, dismissOffer } = useTripOfferListener();
 	const acceptMutation = useAcceptAssignment();
@@ -107,7 +117,10 @@ export default function DriverHomeScreen() {
 
 	const handleToggleAvailability = () => {
 		if (!isApproved) {
-			Alert.alert('Conta Pendente', 'Aguarde a aprovação dos seus documentos para ficar online');
+			Alert.alert(
+				'Conta Pendente',
+				'Aguarde a aprovação dos seus documentos para ficar online',
+			);
 			return;
 		}
 		const newStatus: DriverAvailability = isOnline ? 'OFFLINE' : 'ONLINE';
@@ -119,7 +132,9 @@ export default function DriverHomeScreen() {
 		acceptMutation.mutate(currentOffer.assignmentId, {
 			onSuccess: () => {
 				dismissOffer();
-				navigation.navigate('ActiveTrip', { tripId: currentOffer.tripId });
+				navigation.navigate('ActiveTrip', {
+					tripId: currentOffer.tripId,
+				});
 			},
 		});
 	};
@@ -131,7 +146,9 @@ export default function DriverHomeScreen() {
 		});
 	};
 
-	const ratingRounded = driverProfile ? Math.round(driverProfile.ratingAverage * 10) / 10 : 0;
+	const ratingRounded = driverProfile
+		? Math.round(driverProfile.ratingAverage * 10) / 10
+		: 0;
 	const balance = driverProfile?.availableBalance ?? 0;
 	const pendingBalance = driverProfile?.pendingBalance ?? 0;
 	const completedTrips = driverProfile?.completedTripsCount ?? 0;
@@ -163,12 +180,23 @@ export default function DriverHomeScreen() {
 					<Text className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
 						Motorista
 					</Text>
-					<Text className="text-lg font-black text-secondary dark:text-off-white mt-0.5" numberOfLines={1}>
+					<Text
+						className="text-lg font-black text-secondary dark:text-off-white mt-0.5"
+						numberOfLines={1}
+					>
 						{user?.name?.split(' ')[0] || 'Motorista'}
 					</Text>
 				</View>
-				<TouchableOpacity onPress={toggleMenu} className="w-10 h-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10" activeOpacity={0.7}>
-					<Ionicons name="menu-outline" size={24} color={themeColors.text} />
+				<TouchableOpacity
+					onPress={toggleMenu}
+					className="w-10 h-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10"
+					activeOpacity={0.7}
+				>
+					<Ionicons
+						name="menu-outline"
+						size={24}
+						color={themeColors.text}
+					/>
 				</TouchableOpacity>
 			</View>
 
@@ -178,15 +206,23 @@ export default function DriverHomeScreen() {
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Online Toggle — Hero */}
-				<Animated.View entering={FadeInDown.duration(800)} className="items-center mt-6 mb-2">
+				<Animated.View
+					entering={FadeInDown.duration(800)}
+					className="items-center mt-6 mb-2"
+				>
 					<TouchableOpacity
 						onPress={handleToggleAvailability}
 						activeOpacity={0.8}
-						disabled={availabilityMutation.isPending || profileLoading}
+						disabled={
+							availabilityMutation.isPending || profileLoading
+						}
 					>
 						{availabilityMutation.isPending ? (
 							<View className="w-36 h-36 rounded-full items-center justify-center bg-gray-300 dark:bg-[#2A2A2A]">
-								<ActivityIndicator size="large" color={themeColors.primary} />
+								<ActivityIndicator
+									size="large"
+									color={themeColors.primary}
+								/>
 							</View>
 						) : (
 							<PulseCircle isOnline={isOnline} size={144} />
@@ -212,15 +248,20 @@ export default function DriverHomeScreen() {
 				>
 					<View className="flex-row items-center justify-between">
 						<View>
-							<Text className="text-xs font-bold text-secondary/60 uppercase tracking-widest">Disponível</Text>
+							<Text className="text-xs font-bold text-secondary/60 uppercase tracking-widest">
+								Disponível
+							</Text>
 							<Text className="text-3xl font-black text-secondary mt-1">
 								{Number(balance).toLocaleString('pt-AO')} Kz
 							</Text>
 						</View>
 						<View className="items-end">
-							<Text className="text-xs font-bold text-secondary/60 uppercase tracking-widest">Pendente</Text>
+							<Text className="text-xs font-bold text-secondary/60 uppercase tracking-widest">
+								Pendente
+							</Text>
 							<Text className="text-base font-black text-secondary mt-1">
-								{Number(pendingBalance).toLocaleString('pt-AO')} Kz
+								{Number(pendingBalance).toLocaleString('pt-AO')}{' '}
+								Kz
 							</Text>
 						</View>
 					</View>
@@ -228,20 +269,42 @@ export default function DriverHomeScreen() {
 						onPress={() => navigation.navigate('DriverEarnings')}
 						className="mt-4 py-3 rounded-2xl items-center bg-secondary/10 active:opacity-70"
 					>
-						<Text className="text-sm font-black text-secondary">Ver Ganhos</Text>
+						<Text className="text-sm font-black text-secondary">
+							Ver Ganhos
+						</Text>
 					</TouchableOpacity>
 				</Animated.View>
 
 				{/* Stats Mini-Cards */}
-				<Animated.View entering={FadeInDown.duration(800).delay(250)} className="flex-row gap-3 mt-5">
+				<Animated.View
+					entering={FadeInDown.duration(800).delay(250)}
+					className="flex-row gap-3 mt-5"
+				>
 					{[
-						{ icon: 'star', value: String(ratingRounded), label: 'Avaliação', color: themeColors.primary },
-						{ icon: 'checkmark-circle', value: String(completedTrips), label: 'Viagens', color: '#10B981' },
-						{ icon: 'close-circle', value: String(cancelledTrips), label: 'Canceladas', color: '#ED1C24' },
+						{
+							icon: 'star',
+							value: String(ratingRounded),
+							label: 'Avaliação',
+							color: themeColors.primary,
+						},
+						{
+							icon: 'checkmark-circle',
+							value: String(completedTrips),
+							label: 'Viagens',
+							color: '#10B981',
+						},
+						{
+							icon: 'close-circle',
+							value: String(cancelledTrips),
+							label: 'Canceladas',
+							color: '#ED1C24',
+						},
 					].map((item, i) => (
 						<Animated.View
 							key={item.label}
-							entering={FadeInDown.duration(800).delay(300 + i * 80)}
+							entering={FadeInDown.duration(800).delay(
+								300 + i * 80,
+							)}
 							className="flex-1 rounded-2xl p-4 items-center"
 							style={{
 								backgroundColor: isDark ? '#1A1A1A' : '#FFF',
@@ -252,7 +315,11 @@ export default function DriverHomeScreen() {
 								shadowRadius: 8,
 							}}
 						>
-							<Ionicons name={item.icon as any} size={24} color={item.color} />
+							<Ionicons
+								name={item.icon as any}
+								size={24}
+								color={item.color}
+							/>
 							<Text className="text-lg font-black text-secondary dark:text-off-white mt-2">
 								{item.value}
 							</Text>
@@ -265,10 +332,17 @@ export default function DriverHomeScreen() {
 
 				{/* Compliance — only if not approved */}
 				{!isApproved && driverProfile && (
-					<Animated.View entering={FadeInDown.duration(800).delay(400)} className="mt-5">
+					<Animated.View
+						entering={FadeInDown.duration(800).delay(400)}
+						className="mt-5"
+					>
 						<View className="flex-row items-center gap-3 rounded-2xl p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
 							<View className="w-10 h-10 rounded-xl items-center justify-center bg-amber-500/20">
-								<Ionicons name="warning-outline" size={22} color="#F59E0B" />
+								<Ionicons
+									name="warning-outline"
+									size={22}
+									color="#F59E0B"
+								/>
 							</View>
 							<View className="flex-1">
 								<Text className="text-sm font-bold text-amber-800 dark:text-amber-400">
@@ -290,7 +364,11 @@ export default function DriverHomeScreen() {
 			</ScrollView>
 
 			{/* Trip Offer Modal */}
-			<Modal visible={!!currentOffer && !acceptMutation.isPending} animationType="slide" transparent>
+			<Modal
+				visible={!!currentOffer && !acceptMutation.isPending}
+				animationType="slide"
+				transparent
+			>
 				<View className="flex-1 justify-end bg-black/50">
 					<Animated.View
 						entering={FadeInDown.duration(400)}
@@ -298,11 +376,16 @@ export default function DriverHomeScreen() {
 						style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF' }}
 					>
 						<View className="flex-row items-center gap-3 mb-5">
-							<View className="w-12 h-12 rounded-2xl items-center justify-center" style={{ backgroundColor: '#10B981' }}>
+							<View
+								className="w-12 h-12 rounded-2xl items-center justify-center"
+								style={{ backgroundColor: '#10B981' }}
+							>
 								<Ionicons name="car" size={26} color="#FFF" />
 							</View>
 							<View>
-								<Text className="text-xl font-black text-secondary dark:text-off-white">Nova Viagem</Text>
+								<Text className="text-xl font-black text-secondary dark:text-off-white">
+									Nova Viagem
+								</Text>
 								<Text className="text-xs font-bold text-gray-500">
 									Oportunidade de ganho
 								</Text>
@@ -319,10 +402,16 @@ export default function DriverHomeScreen() {
 										<View className="w-3 h-3 rounded-full bg-primary" />
 									</View>
 									<View className="flex-1 gap-2">
-										<Text className="text-sm font-bold text-secondary dark:text-off-white" numberOfLines={2}>
+										<Text
+											className="text-sm font-bold text-secondary dark:text-off-white"
+											numberOfLines={2}
+										>
 											{currentOffer.pickupAddress}
 										</Text>
-										<Text className="text-sm font-bold text-secondary dark:text-off-white" numberOfLines={2}>
+										<Text
+											className="text-sm font-bold text-secondary dark:text-off-white"
+											numberOfLines={2}
+										>
 											{currentOffer.dropoffAddress}
 										</Text>
 									</View>
@@ -331,14 +420,28 @@ export default function DriverHomeScreen() {
 								{/* Info Row */}
 								<View className="flex-row gap-3">
 									{[
-										{ label: 'Distância', value: `${currentOffer.estimatedDistanceKm?.toFixed(1)} km` },
-										{ label: 'Duração', value: `${currentOffer.estimatedDurationMin} min` },
-										{ label: 'Ganho', value: `${Number(currentOffer.totalPrice).toLocaleString('pt-AO')} Kz`, accent: true },
+										{
+											label: 'Distância',
+											value: `${currentOffer.estimatedDistanceKm?.toFixed(1)} km`,
+										},
+										{
+											label: 'Duração',
+											value: `${currentOffer.estimatedDurationMin} min`,
+										},
+										{
+											label: 'Ganho',
+											value: `${Number(currentOffer.totalPrice).toLocaleString('pt-AO')} Kz`,
+											accent: true,
+										},
 									].map((info) => (
 										<View
 											key={info.label}
 											className="flex-1 items-center py-3 rounded-2xl"
-											style={{ backgroundColor: isDark ? '#2A2A2A' : '#F3F4F6' }}
+											style={{
+												backgroundColor: isDark
+													? '#2A2A2A'
+													: '#F3F4F6',
+											}}
 										>
 											<Text
 												className={`text-sm font-black ${info.accent ? 'text-primary' : 'text-secondary dark:text-off-white'}`}
@@ -363,7 +466,9 @@ export default function DriverHomeScreen() {
 								{rejectMutation.isPending ? (
 									<ActivityIndicator color="#EF4444" />
 								) : (
-									<Text className="text-base font-black text-red-500">Recusar</Text>
+									<Text className="text-base font-black text-red-500">
+										Recusar
+									</Text>
 								)}
 							</TouchableOpacity>
 							<TouchableOpacity
@@ -375,7 +480,9 @@ export default function DriverHomeScreen() {
 								{acceptMutation.isPending ? (
 									<ActivityIndicator color="#FFF" />
 								) : (
-									<Text className="text-base font-black text-white">Aceitar</Text>
+									<Text className="text-base font-black text-white">
+										Aceitar
+									</Text>
 								)}
 							</TouchableOpacity>
 						</View>

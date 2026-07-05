@@ -1,6 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import MapView, { Marker, Polyline, Region, MapPressEvent } from 'react-native-maps';
+import MapView, {
+	Marker,
+	Polyline,
+	Region,
+	MapPressEvent,
+} from 'react-native-maps';
 
 type LatLng = {
 	latitude: number;
@@ -11,7 +16,12 @@ type MapViewWrapperProps = {
 	initialRegion?: Region;
 	style?: object;
 	onPress?: (lat: number, lng: number) => void;
-	markers?: Array<{ id: string; latitude: number; longitude: number; title?: string }>;
+	markers?: Array<{
+		id: string;
+		latitude: number;
+		longitude: number;
+		title?: string;
+	}>;
 	routeCoords?: LatLng[];
 };
 
@@ -29,7 +39,10 @@ export default function MapViewWrapper({
 }: MapViewWrapperProps) {
 	const handlePress = (e: MapPressEvent) => {
 		if (onPress) {
-			onPress(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude);
+			onPress(
+				e.nativeEvent.coordinate.latitude,
+				e.nativeEvent.coordinate.longitude,
+			);
 		}
 	};
 

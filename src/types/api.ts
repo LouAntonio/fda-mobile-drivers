@@ -1,4 +1,12 @@
-export type UserRole = 'CLIENT' | 'DRIVER' | 'SUPER_ADMIN' | 'OPERATIONS' | 'SUPPORT' | 'VALIDATOR' | 'FINANCE' | 'FLEET_MANAGER';
+export type UserRole =
+	| 'CLIENT'
+	| 'DRIVER'
+	| 'SUPER_ADMIN'
+	| 'OPERATIONS'
+	| 'SUPPORT'
+	| 'VALIDATOR'
+	| 'FINANCE'
+	| 'FLEET_MANAGER';
 
 export type UserStatus = 'ACTIVE' | 'BANNED' | 'DELETED';
 
@@ -6,7 +14,13 @@ export type VehicleType = 'MOTO' | 'CARRO';
 
 export type ServiceType = 'RIDE' | 'DELIVERY';
 
-export type TripStatus = 'REQUESTED' | 'ACCEPTED' | 'PICKUP_IN_PROGRESS' | 'STARTED' | 'COMPLETED' | 'CANCELLED';
+export type TripStatus =
+	| 'REQUESTED'
+	| 'ACCEPTED'
+	| 'PICKUP_IN_PROGRESS'
+	| 'STARTED'
+	| 'COMPLETED'
+	| 'CANCELLED';
 
 export type PaymentMethod = 'CASH' | 'MCX_EXPRESS' | 'UNITEL_MONEY';
 
@@ -14,13 +28,21 @@ export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
 
 export type AddressLabel = 'HOME' | 'WORK' | 'OTHER';
 
-export type DriverComplianceStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
+export type DriverComplianceStatus =
+	| 'PENDING'
+	| 'APPROVED'
+	| 'REJECTED'
+	| 'SUSPENDED';
 
 export type DriverAvailability = 'ONLINE' | 'OFFLINE' | 'BUSY';
 
 export type TripAssignmentStatus = 'OFFERED' | 'REJECTED' | 'EXPIRED';
 
-export type DeliveryStatus = 'WAITING_PICKUP' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED';
+export type DeliveryStatus =
+	| 'WAITING_PICKUP'
+	| 'PICKED_UP'
+	| 'IN_TRANSIT'
+	| 'DELIVERED';
 
 export type VehicleStatus = 'PENDING' | 'ACTIVE' | 'BLOCKED' | 'MAINTENANCE';
 

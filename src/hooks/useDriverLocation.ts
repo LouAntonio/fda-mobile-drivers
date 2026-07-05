@@ -8,7 +8,11 @@ interface UseDriverLocationOptions {
 	tripId?: string;
 }
 
-export function useDriverLocation({ enabled, intervalMs = 10000, tripId }: UseDriverLocationOptions) {
+export function useDriverLocation({
+	enabled,
+	intervalMs = 10000,
+	tripId,
+}: UseDriverLocationOptions) {
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const lastLocationRef = useRef<{ lat: number; lng: number } | null>(null);
 
@@ -32,8 +36,10 @@ export function useDriverLocation({ enabled, intervalMs = 10000, tripId }: UseDr
 
 		intervalRef.current = setInterval(async () => {
 			try {
-				const { getCurrentPositionAsync, requestForegroundPermissionsAsync } =
-					await import('expo-location');
+				const {
+					getCurrentPositionAsync,
+					requestForegroundPermissionsAsync,
+				} = await import('expo-location');
 
 				const { status } = await requestForegroundPermissionsAsync();
 				if (status !== 'granted') return;

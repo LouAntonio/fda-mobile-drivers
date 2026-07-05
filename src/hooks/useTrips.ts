@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import {
+	useQuery,
+	useMutation,
+	useQueryClient,
+	useInfiniteQuery,
+} from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import { AxiosError } from 'axios';
 import {
@@ -89,7 +94,9 @@ export function useCancelTrip() {
 		mutationFn: ({ id, reason }: { id: string; reason: string }) =>
 			cancelTrip(id, reason),
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: tripKeys.detail(data.id) });
+			queryClient.invalidateQueries({
+				queryKey: tripKeys.detail(data.id),
+			});
 			queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
@@ -115,11 +122,16 @@ export function useUpdateTripStatus() {
 			cancelReason?: string;
 		}) => updateTripStatus(tripId, status, cancelReason),
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: tripKeys.detail(data.id) });
+			queryClient.invalidateQueries({
+				queryKey: tripKeys.detail(data.id),
+			});
 			queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao atualizar status');
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao atualizar status',
+			);
 		},
 	});
 }
@@ -128,21 +140,34 @@ export function useUpdateDeliveryStatus() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({ tripId, deliveryStatus }: { tripId: string; deliveryStatus: DeliveryStatus }) =>
-			updateDeliveryStatus(tripId, deliveryStatus),
+		mutationFn: ({
+			tripId,
+			deliveryStatus,
+		}: {
+			tripId: string;
+			deliveryStatus: DeliveryStatus;
+		}) => updateDeliveryStatus(tripId, deliveryStatus),
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: tripKeys.detail(data.id) });
+			queryClient.invalidateQueries({
+				queryKey: tripKeys.detail(data.id),
+			});
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao atualizar entrega');
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao atualizar entrega',
+			);
 		},
 	});
 }
 
 export function useOpenDispute() {
 	return useMutation({
-		mutationFn: (payload: { tripId: string; reason: string; description: string }) =>
-			openDispute(payload),
+		mutationFn: (payload: {
+			tripId: string;
+			reason: string;
+			description: string;
+		}) => openDispute(payload),
 		onSuccess: () => {
 			Alert.alert('Sucesso', 'Disputa aberta com sucesso');
 		},

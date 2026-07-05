@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-	View,
-	Text,
-	ScrollView,
-	TouchableOpacity,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, {
@@ -305,8 +300,6 @@ export default function PaymentMethodsScreen() {
 					</Text>
 				</Animated.View>
 			</ScrollView>
-
-
 		</SafeAreaView>
 	);
 }

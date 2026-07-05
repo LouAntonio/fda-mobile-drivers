@@ -20,7 +20,10 @@ export async function geocodeForward(query: string): Promise<MapboxFeature[]> {
 	}));
 }
 
-export async function geocodeReverse(lng: number, lat: number): Promise<MapboxFeature | null> {
+export async function geocodeReverse(
+	lng: number,
+	lat: number,
+): Promise<MapboxFeature | null> {
 	const url = `${MAPBOX_BASE}/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=ao&language=pt&types=address,place,locality,neighborhood,poi`;
 
 	const res = await fetch(url);

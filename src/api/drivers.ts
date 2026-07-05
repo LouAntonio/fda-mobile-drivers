@@ -1,12 +1,18 @@
 import { api } from '../lib/api';
-import type { DriverProfile, DriverDocument, DriverAvailability } from '../types/api';
+import type {
+	DriverProfile,
+	DriverDocument,
+	DriverAvailability,
+} from '../types/api';
 
 export async function fetchMyDriverProfile(): Promise<DriverProfile> {
 	const { data } = await api.get('/drivers/me');
 	return data as DriverProfile;
 }
 
-export async function updateAvailability(availability: DriverAvailability): Promise<void> {
+export async function updateAvailability(
+	availability: DriverAvailability,
+): Promise<void> {
 	await api.patch('/drivers/me/availability', { availability });
 }
 
@@ -17,7 +23,13 @@ export async function updateLocation(
 	speed?: number,
 	accuracy?: number,
 ): Promise<void> {
-	await api.patch('/drivers/me/location', { lat, lng, heading, speed, accuracy });
+	await api.patch('/drivers/me/location', {
+		lat,
+		lng,
+		heading,
+		speed,
+		accuracy,
+	});
 }
 
 export async function fetchDriverDocuments(): Promise<DriverDocument[]> {
@@ -30,6 +42,10 @@ export async function uploadDocument(
 	fileUrl: string,
 	expiryDate?: string,
 ): Promise<DriverDocument> {
-	const { data } = await api.post('/drivers/me/documents', { type, fileUrl, expiryDate });
+	const { data } = await api.post('/drivers/me/documents', {
+		type,
+		fileUrl,
+		expiryDate,
+	});
 	return data as DriverDocument;
 }

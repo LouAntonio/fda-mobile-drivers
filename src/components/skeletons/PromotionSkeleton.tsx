@@ -28,7 +28,11 @@ export function PromotionSkeleton({ isDark }: PromotionSkeletonProps) {
 					<SkeletonBox width={65} height={65} borderRadius={18} />
 					<View className="flex-1 gap-2">
 						<SkeletonBox width="80%" height={18} borderRadius={6} />
-						<SkeletonBox width="100%" height={14} borderRadius={6} />
+						<SkeletonBox
+							width="100%"
+							height={14}
+							borderRadius={6}
+						/>
 					</View>
 				</View>
 				<View className="flex-row justify-between items-center pt-4 border-t border-gray-200/20">

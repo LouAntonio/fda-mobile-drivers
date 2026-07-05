@@ -408,12 +408,16 @@ export default function ContactScreen() {
 										numberOfLines={5}
 										leftIcon="chatbox-outline"
 									/>
-								<Button
-									title={contactMutation.isPending ? 'A enviar...' : 'Enviar Mensagem'}
-									onPress={handleSend}
-									className="mt-2"
-									disabled={contactMutation.isPending}
-								/>
+									<Button
+										title={
+											contactMutation.isPending
+												? 'A enviar...'
+												: 'Enviar Mensagem'
+										}
+										onPress={handleSend}
+										className="mt-2"
+										disabled={contactMutation.isPending}
+									/>
 								</View>
 							</Animated.View>
 						</View>

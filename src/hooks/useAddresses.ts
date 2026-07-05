@@ -1,11 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import { AxiosError } from 'axios';
-import {
-	fetchAddresses,
-	createAddress,
-	deleteAddress,
-} from '../api/address';
+import { fetchAddresses, createAddress, deleteAddress } from '../api/address';
 import { useAuthStore } from '../store/authStore';
 import type { AddressLabel, UserAddress, ApiResponse } from '../types/api';
 

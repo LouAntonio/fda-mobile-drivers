@@ -8,12 +8,16 @@ export function useDriverAvailability() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (availability: DriverAvailability) => updateAvailability(availability),
+		mutationFn: (availability: DriverAvailability) =>
+			updateAvailability(availability),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['driver', 'profile'] });
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao alterar disponibilidade');
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao alterar disponibilidade',
+			);
 		},
 	});
 }

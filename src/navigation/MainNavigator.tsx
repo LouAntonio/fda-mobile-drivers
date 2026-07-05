@@ -24,11 +24,23 @@ export default function MainNavigator() {
 			<Stack.Screen name="Info" component={InfoScreen} />
 			<Stack.Screen name="Contact" component={ContactScreen} />
 			<Stack.Screen name="Settings" component={SettingsScreen} />
-			<Stack.Screen name="ActiveTrip" component={DriverActiveTripScreen} />
+			<Stack.Screen
+				name="ActiveTrip"
+				component={DriverActiveTripScreen}
+			/>
 			<Stack.Screen name="TripDetail" component={TripDetailScreen} />
-			<Stack.Screen name="DriverEarnings" component={DriverEarningsScreen} />
-			<Stack.Screen name="DriverDocuments" component={DriverDocumentsScreen} />
-			<Stack.Screen name="DriverVehicle" component={DriverVehicleScreen} />
+			<Stack.Screen
+				name="DriverEarnings"
+				component={DriverEarningsScreen}
+			/>
+			<Stack.Screen
+				name="DriverDocuments"
+				component={DriverDocumentsScreen}
+			/>
+			<Stack.Screen
+				name="DriverVehicle"
+				component={DriverVehicleScreen}
+			/>
 		</Stack.Navigator>
 	);
 }

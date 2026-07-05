@@ -21,11 +21,18 @@ export function useLogin() {
 		onSuccess: (res) => {
 			const authData = res.data as unknown as AuthTokens;
 			if (authData) {
-				setAuth(authData.user, authData.accessToken, authData.refreshToken);
+				setAuth(
+					authData.user,
+					authData.accessToken,
+					authData.refreshToken,
+				);
 			}
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao fazer login.');
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao fazer login.',
+			);
 		},
 	});
 }
@@ -37,7 +44,10 @@ export function useRegister() {
 			Alert.alert('Sucesso', 'Conta criada com sucesso!');
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao criar conta.');
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao criar conta.',
+			);
 		},
 	});
 }
@@ -81,7 +91,11 @@ export function useGoogleLogin() {
 				const res = await loginWithGoogle(idToken);
 				const authData = res.data as unknown as AuthTokens;
 				if (authData) {
-					setAuth(authData.user, authData.accessToken, authData.refreshToken);
+					setAuth(
+						authData.user,
+						authData.accessToken,
+						authData.refreshToken,
+					);
 					return authData;
 				}
 			} catch (err) {

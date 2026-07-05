@@ -70,8 +70,7 @@ export default function AddressesScreen() {
 		createAddress(
 			{
 				label: selectedLabel,
-				customLabel:
-					selectedLabel === 'OTHER' ? newLabel : undefined,
+				customLabel: selectedLabel === 'OTHER' ? newLabel : undefined,
 				address: newAddress,
 				lat: -8.8399,
 				lng: 13.2344,
@@ -174,9 +173,9 @@ export default function AddressesScreen() {
 							return (
 								<Animated.View
 									key={item.id}
-									entering={FadeInRight.duration(
-										500,
-									).delay(index * 80)}
+									entering={FadeInRight.duration(500).delay(
+										index * 80,
+									)}
 								>
 									<TouchableOpacity
 										className="flex-row bg-white dark:bg-soft-black rounded-2xl mb-3 overflow-hidden active:opacity-70"
@@ -190,8 +189,7 @@ export default function AddressesScreen() {
 											shadowOpacity: 0.05,
 											shadowRadius: 8,
 											borderWidth: 1,
-											borderColor:
-												'rgba(0,0,0,0.04)',
+											borderColor: 'rgba(0,0,0,0.04)',
 										}}
 										activeOpacity={0.7}
 									>
@@ -199,8 +197,7 @@ export default function AddressesScreen() {
 										<View
 											style={{
 												width: 4,
-												backgroundColor:
-													accentColor,
+												backgroundColor: accentColor,
 											}}
 										/>
 
@@ -327,15 +324,12 @@ export default function AddressesScreen() {
 								{LABEL_OPTIONS.map((opt) => {
 									const isActive =
 										selectedLabel === opt.value;
-									const accentColor =
-										LABEL_COLORS[opt.value];
+									const accentColor = LABEL_COLORS[opt.value];
 									return (
 										<TouchableOpacity
 											key={opt.value}
 											onPress={() =>
-												setSelectedLabel(
-													opt.value,
-												)
+												setSelectedLabel(opt.value)
 											}
 											className={`flex-1 flex-row items-center justify-center py-3 px-2 rounded-xl gap-1 ${
 												isActive

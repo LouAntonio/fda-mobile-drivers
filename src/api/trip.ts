@@ -1,5 +1,11 @@
 import { api } from '../lib/api';
-import type { Coords, TripStatus, ServiceType, PaymentMethod, DeliveryStatus } from '../types/api';
+import type {
+	Coords,
+	TripStatus,
+	ServiceType,
+	PaymentMethod,
+	DeliveryStatus,
+} from '../types/api';
 
 export interface TripFromApi {
 	id: string;
@@ -168,7 +174,9 @@ export interface DisputePayload {
 	description: string;
 }
 
-export async function fetchTrips(filters: ListTripsFilters = {}): Promise<ListTripsResponse> {
+export async function fetchTrips(
+	filters: ListTripsFilters = {},
+): Promise<ListTripsResponse> {
 	const { data } = await api.get('/trips', { params: filters });
 	return data as ListTripsResponse;
 }
@@ -178,17 +186,24 @@ export async function fetchTripById(id: string): Promise<TripFromApi> {
 	return data as TripFromApi;
 }
 
-export async function estimateTrip(payload: EstimateTripPayload): Promise<EstimateResult> {
+export async function estimateTrip(
+	payload: EstimateTripPayload,
+): Promise<EstimateResult> {
 	const { data } = await api.post('/trips/estimate', payload);
 	return data as EstimateResult;
 }
 
-export async function createTrip(payload: CreateTripPayload): Promise<TripFromApi> {
+export async function createTrip(
+	payload: CreateTripPayload,
+): Promise<TripFromApi> {
 	const { data } = await api.post('/trips', payload);
 	return data as TripFromApi;
 }
 
-export async function cancelTrip(id: string, cancelReason: string): Promise<TripFromApi> {
+export async function cancelTrip(
+	id: string,
+	cancelReason: string,
+): Promise<TripFromApi> {
 	const { data } = await api.post(`/trips/${id}/cancel`, { cancelReason });
 	return data as TripFromApi;
 }
@@ -203,7 +218,10 @@ export async function updateTripStatus(
 	status: TripStatus,
 	cancelReason?: string,
 ): Promise<TripFromApi> {
-	const { data } = await api.patch(`/trips/${id}/status`, { status, cancelReason });
+	const { data } = await api.patch(`/trips/${id}/status`, {
+		status,
+		cancelReason,
+	});
 	return data as TripFromApi;
 }
 
@@ -211,7 +229,9 @@ export async function updateDeliveryStatus(
 	id: string,
 	deliveryStatus: DeliveryStatus,
 ): Promise<TripFromApi> {
-	const { data } = await api.patch(`/trips/${id}/delivery-status`, { deliveryStatus });
+	const { data } = await api.patch(`/trips/${id}/delivery-status`, {
+		deliveryStatus,
+	});
 	return data as TripFromApi;
 }
 

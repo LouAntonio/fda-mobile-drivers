@@ -1,10 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import { AxiosError } from 'axios';
-import {
-	fetchDriverDocuments,
-	uploadDocument,
-} from '../api/drivers';
+import { fetchDriverDocuments, uploadDocument } from '../api/drivers';
 
 export function useDriverDocuments() {
 	return useQuery({
@@ -27,12 +24,17 @@ export function useUploadDocument() {
 			expiryDate?: string;
 		}) => uploadDocument(type, fileUrl, expiryDate),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['driver', 'documents'] });
+			queryClient.invalidateQueries({
+				queryKey: ['driver', 'documents'],
+			});
 			queryClient.invalidateQueries({ queryKey: ['driver', 'profile'] });
 			Alert.alert('Sucesso', 'Documento enviado com sucesso');
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao enviar documento');
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao enviar documento',
+			);
 		},
 	});
 }

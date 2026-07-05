@@ -57,7 +57,8 @@ export default function SettingsScreen() {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [deletePassword, setDeletePassword] = useState('');
 
-	const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+	const [showChangePasswordModal, setShowChangePasswordModal] =
+		useState(false);
 	const [passwordCurrent, setPasswordCurrent] = useState('');
 	const [passwordNew, setPasswordNew] = useState('');
 	const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -93,7 +94,10 @@ export default function SettingsScreen() {
 			return;
 		}
 		if (passwordNew.length < 6) {
-			Alert.alert('Atenção', 'A nova palavra-passe deve ter pelo menos 6 caracteres');
+			Alert.alert(
+				'Atenção',
+				'A nova palavra-passe deve ter pelo menos 6 caracteres',
+			);
 			return;
 		}
 		passwordMutation.mutate();
@@ -104,13 +108,15 @@ export default function SettingsScreen() {
 	const [emailPassword, setEmailPassword] = useState('');
 
 	const emailMutation = useMutation({
-		mutationFn: () =>
-			changeEmail({ newEmail, password: emailPassword }),
+		mutationFn: () => changeEmail({ newEmail, password: emailPassword }),
 		onSuccess: () => {
 			setShowChangeEmailModal(false);
 			setNewEmail('');
 			setEmailPassword('');
-			Alert.alert('Sucesso', 'Email alterado! Verifica a tua caixa de entrada.');
+			Alert.alert(
+				'Sucesso',
+				'Email alterado! Verifica a tua caixa de entrada.',
+			);
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
 			Alert.alert(
@@ -139,7 +145,8 @@ export default function SettingsScreen() {
 		},
 		onError: (err: any) => {
 			const msg =
-				err?.response?.data?.msg || 'Erro ao eliminar conta. Tenta novamente.';
+				err?.response?.data?.msg ||
+				'Erro ao eliminar conta. Tenta novamente.';
 			Alert.alert('Erro', msg);
 		},
 	});
@@ -353,7 +360,13 @@ export default function SettingsScreen() {
 								/>
 							</TouchableOpacity>
 						</Animated.View>
-						<View style={{ height: 0.5, backgroundColor: themeColors.border, marginLeft: 74 }} />
+						<View
+							style={{
+								height: 0.5,
+								backgroundColor: themeColors.border,
+								marginLeft: 74,
+							}}
+						/>
 						<Animated.View
 							entering={FadeInRight.duration(400).delay(75)}
 						>
@@ -399,7 +412,13 @@ export default function SettingsScreen() {
 								/>
 							</TouchableOpacity>
 						</Animated.View>
-						<View style={{ height: 0.5, backgroundColor: themeColors.border, marginLeft: 74 }} />
+						<View
+							style={{
+								height: 0.5,
+								backgroundColor: themeColors.border,
+								marginLeft: 74,
+							}}
+						/>
 						<Animated.View
 							entering={FadeInRight.duration(400).delay(100)}
 						>
@@ -490,7 +509,9 @@ export default function SettingsScreen() {
 						className="absolute inset-0 bg-black/60"
 						onPress={() => setShowChangePasswordModal(false)}
 					/>
-					<Animated.View entering={FadeInDown.duration(300).springify()}>
+					<Animated.View
+						entering={FadeInDown.duration(300).springify()}
+					>
 						<View
 							className="mx-6 rounded-[32px] p-6"
 							style={{
@@ -499,7 +520,11 @@ export default function SettingsScreen() {
 						>
 							<View className="items-center mb-6">
 								<View className="w-16 h-16 rounded-full bg-orange-500/10 items-center justify-center mb-4">
-									<Ionicons name="lock-closed-outline" size={32} color="#FF9500" />
+									<Ionicons
+										name="lock-closed-outline"
+										size={32}
+										color="#FF9500"
+									/>
 								</View>
 								<Text
 									className="text-xl font-black text-center"
@@ -517,7 +542,9 @@ export default function SettingsScreen() {
 								value={passwordCurrent}
 								onChangeText={setPasswordCurrent}
 								style={{
-									backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5',
+									backgroundColor: isDark
+										? '#2C2C2E'
+										: '#F5F5F5',
 									color: themeColors.text,
 								}}
 							/>
@@ -529,7 +556,9 @@ export default function SettingsScreen() {
 								value={passwordNew}
 								onChangeText={setPasswordNew}
 								style={{
-									backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5',
+									backgroundColor: isDark
+										? '#2C2C2E'
+										: '#F5F5F5',
 									color: themeColors.text,
 								}}
 							/>
@@ -541,7 +570,9 @@ export default function SettingsScreen() {
 								value={passwordConfirm}
 								onChangeText={setPasswordConfirm}
 								style={{
-									backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5',
+									backgroundColor: isDark
+										? '#2C2C2E'
+										: '#F5F5F5',
 									color: themeColors.text,
 								}}
 							/>
@@ -550,7 +581,9 @@ export default function SettingsScreen() {
 								<TouchableOpacity
 									className="flex-1 py-3.5 rounded-2xl"
 									style={{
-										backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5',
+										backgroundColor: isDark
+											? '#2C2C2E'
+											: '#F5F5F5',
 									}}
 									onPress={() => {
 										setShowChangePasswordModal(false);
@@ -574,7 +607,9 @@ export default function SettingsScreen() {
 									activeOpacity={0.7}
 								>
 									<Text className="text-center font-bold text-white">
-										{passwordMutation.isPending ? 'A alterar...' : 'Alterar'}
+										{passwordMutation.isPending
+											? 'A alterar...'
+											: 'Alterar'}
 									</Text>
 								</TouchableOpacity>
 							</View>
@@ -598,7 +633,9 @@ export default function SettingsScreen() {
 						className="absolute inset-0 bg-black/60"
 						onPress={() => setShowChangeEmailModal(false)}
 					/>
-					<Animated.View entering={FadeInDown.duration(300).springify()}>
+					<Animated.View
+						entering={FadeInDown.duration(300).springify()}
+					>
 						<View
 							className="mx-6 rounded-[32px] p-6"
 							style={{
@@ -607,7 +644,11 @@ export default function SettingsScreen() {
 						>
 							<View className="items-center mb-6">
 								<View className="w-16 h-16 rounded-full bg-blue-500/10 items-center justify-center mb-4">
-									<Ionicons name="mail-outline" size={32} color="#007AFF" />
+									<Ionicons
+										name="mail-outline"
+										size={32}
+										color="#007AFF"
+									/>
 								</View>
 								<Text
 									className="text-xl font-black text-center"
@@ -626,7 +667,9 @@ export default function SettingsScreen() {
 								value={newEmail}
 								onChangeText={setNewEmail}
 								style={{
-									backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5',
+									backgroundColor: isDark
+										? '#2C2C2E'
+										: '#F5F5F5',
 									color: themeColors.text,
 								}}
 							/>
@@ -638,7 +681,9 @@ export default function SettingsScreen() {
 								value={emailPassword}
 								onChangeText={setEmailPassword}
 								style={{
-									backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5',
+									backgroundColor: isDark
+										? '#2C2C2E'
+										: '#F5F5F5',
 									color: themeColors.text,
 								}}
 							/>
@@ -647,7 +692,9 @@ export default function SettingsScreen() {
 								<TouchableOpacity
 									className="flex-1 py-3.5 rounded-2xl"
 									style={{
-										backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5',
+										backgroundColor: isDark
+											? '#2C2C2E'
+											: '#F5F5F5',
 									}}
 									onPress={() => {
 										setShowChangeEmailModal(false);
@@ -670,7 +717,9 @@ export default function SettingsScreen() {
 									activeOpacity={0.7}
 								>
 									<Text className="text-center font-bold text-white">
-										{emailMutation.isPending ? 'A alterar...' : 'Alterar'}
+										{emailMutation.isPending
+											? 'A alterar...'
+											: 'Alterar'}
 									</Text>
 								</TouchableOpacity>
 							</View>
@@ -694,7 +743,9 @@ export default function SettingsScreen() {
 						className="absolute inset-0 bg-black/60"
 						onPress={() => setShowDeleteModal(false)}
 					/>
-					<Animated.View entering={FadeInDown.duration(300).springify()}>
+					<Animated.View
+						entering={FadeInDown.duration(300).springify()}
+					>
 						<View
 							className="mx-6 rounded-[32px] p-6"
 							style={{
@@ -719,8 +770,8 @@ export default function SettingsScreen() {
 									className="text-sm text-center mt-2"
 									style={{ color: themeColors.text + '99' }}
 								>
-									Esta ação é irreversível. Todos os teus dados
-									serão removidos permanentemente.
+									Esta ação é irreversível. Todos os teus
+									dados serão removidos permanentemente.
 								</Text>
 							</View>
 
@@ -800,9 +851,12 @@ function StoreNotificationToggle({
 	const value = useNotificationStore((s) => s[storeKey]);
 	const setter = useNotificationStore((s) => {
 		switch (storeKey) {
-			case 'pushEnabled': return s.setPushEnabled;
-			case 'emailEnabled': return s.setEmailEnabled;
-			case 'soundsEnabled': return s.setSoundsEnabled;
+			case 'pushEnabled':
+				return s.setPushEnabled;
+			case 'emailEnabled':
+				return s.setEmailEnabled;
+			case 'soundsEnabled':
+				return s.setSoundsEnabled;
 		}
 	});
 
@@ -827,7 +881,12 @@ function StoreNotificationToggle({
 					<Ionicons name={icon as any} size={22} color={iconColor} />
 				</View>
 				<View style={styles.settingInfo}>
-					<Text style={[styles.settingLabel, { color: isDark ? '#FFF' : '#000' }]}>
+					<Text
+						style={[
+							styles.settingLabel,
+							{ color: isDark ? '#FFF' : '#000' },
+						]}
+					>
 						{label}
 					</Text>
 					<Text
