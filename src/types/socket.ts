@@ -81,6 +81,11 @@ export interface TripOfferExpiredEvent {
 	tripId: string;
 }
 
+export interface TripNoDriversEvent {
+	tripId: string;
+	message: string;
+}
+
 export interface SocketEventMap {
 	'trip:status': TripStatusEvent;
 	'trip:driver_assigned': TripDriverAssignedEvent;
@@ -91,6 +96,7 @@ export interface SocketEventMap {
 	'trip:offer_accepted': TripOfferAcceptedEvent;
 	'trip:offer_rejected': TripOfferRejectedEvent;
 	'trip:offer_expired': TripOfferExpiredEvent;
+	'trip:no_drivers': TripNoDriversEvent;
 	error: { message: string };
 	connect: void;
 	disconnect: string;

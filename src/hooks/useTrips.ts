@@ -106,14 +106,14 @@ export function useUpdateTripStatus() {
 
 	return useMutation({
 		mutationFn: ({
-			id,
+			tripId,
 			status,
 			cancelReason,
 		}: {
-			id: string;
+			tripId: string;
 			status: TripStatus;
 			cancelReason?: string;
-		}) => updateTripStatus(id, status, cancelReason),
+		}) => updateTripStatus(tripId, status, cancelReason),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: tripKeys.detail(data.id) });
 			queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
@@ -128,8 +128,8 @@ export function useUpdateDeliveryStatus() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({ id, deliveryStatus }: { id: string; deliveryStatus: DeliveryStatus }) =>
-			updateDeliveryStatus(id, deliveryStatus),
+		mutationFn: ({ tripId, deliveryStatus }: { tripId: string; deliveryStatus: DeliveryStatus }) =>
+			updateDeliveryStatus(tripId, deliveryStatus),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: tripKeys.detail(data.id) });
 		},

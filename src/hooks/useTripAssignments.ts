@@ -5,6 +5,7 @@ import { AxiosError } from 'axios';
 import { acceptAssignment, rejectAssignment, type TripOffer } from '../api/assignments';
 import { useAuthStore } from '../store/authStore';
 import { socketManager } from '../lib/socket-manager';
+import type { TripOfferExpiredEvent } from '../types/socket';
 
 export function useTripOfferListener() {
 	const accessToken = useAuthStore((state) => state.accessToken);
@@ -15,12 +16,28 @@ export function useTripOfferListener() {
 
 		socketManager.connect(accessToken);
 
-		const unsubscribe = socketManager.on('trip:offer', (data) => {
+		const unsubOffer = socketManager.on('trip:offer', (data) => {
 			setCurrentOffer(data as unknown as TripOffer);
 		});
 
+		const unsubExpired = socketManager.on('trip:offer_expired', (data: TripOfferExpiredEvent) => {
+			setCurrentOffer((prev) => {
+				if (prev && data.assignmentId === prev.assignmentId) {
+					Alert.alert('Oferta Expirada', 'O tempo para aceitar a viagem terminou.');
+					return null;
+				}
+				return prev;
+			});
+		});
+
+		const unsubError = socketManager.on('error', (data) => {
+			console.warn('[Socket error]', data.message);
+		});
+
 		return () => {
-			unsubscribe();
+			unsubOffer();
+			unsubExpired();
+			unsubError();
 			setCurrentOffer(null);
 		};
 	}, [accessToken]);

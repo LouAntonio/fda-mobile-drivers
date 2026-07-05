@@ -1,12 +1,14 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { updateLocation } from '../api/drivers';
+import { createTripLocationPoint } from '../api/trip-location';
 
 interface UseDriverLocationOptions {
 	enabled: boolean;
 	intervalMs?: number;
+	tripId?: string;
 }
 
-export function useDriverLocation({ enabled, intervalMs = 10000 }: UseDriverLocationOptions) {
+export function useDriverLocation({ enabled, intervalMs = 10000, tripId }: UseDriverLocationOptions) {
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const lastLocationRef = useRef<{ lat: number; lng: number } | null>(null);
 
@@ -37,8 +39,19 @@ export function useDriverLocation({ enabled, intervalMs = 10000 }: UseDriverLoca
 				if (status !== 'granted') return;
 
 				const pos = await getCurrentPositionAsync({});
+				const { latitude, longitude, speed, heading } = pos.coords;
 
-				await sendLocation(pos.coords.latitude, pos.coords.longitude);
+				await sendLocation(latitude, longitude);
+
+				if (tripId) {
+					await createTripLocationPoint({
+						tripId,
+						lat: latitude,
+						lng: longitude,
+						speed: speed ?? undefined,
+						heading: heading ?? undefined,
+					}).catch(() => {});
+				}
 			} catch {
 				// Silently fail
 			}
@@ -50,7 +63,7 @@ export function useDriverLocation({ enabled, intervalMs = 10000 }: UseDriverLoca
 				intervalRef.current = null;
 			}
 		};
-	}, [enabled, intervalMs, sendLocation]);
+	}, [enabled, intervalMs, tripId, sendLocation]);
 
 	return { sendLocation };
 }

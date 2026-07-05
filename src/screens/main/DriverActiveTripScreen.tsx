@@ -13,9 +13,10 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTrip } from '../../hooks/useTrips';
-import { useUpdateTripStatus, useUpdateDeliveryStatus } from '../../hooks/useTripStatusActions';
+import { useUpdateTripStatus, useUpdateDeliveryStatus } from '../../hooks/useTrips';
 import { useActiveTripSocket } from '../../hooks/useActiveTripSocket';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
+import { useDriverLocation } from '../../hooks/useDriverLocation';
 import { useMapRoute } from '../../hooks/useMapRoute';
 import MapView from '../../components/MapView';
 import type { MainStackParamList } from '../../types/navigation';
@@ -52,6 +53,8 @@ export default function DriverActiveTripScreen() {
 	const { clientLocation } = useActiveTripSocket({ tripId, enabled: true });
 	const { location: currentLocation } = useCurrentLocation();
 	const { route: mapRoute, fetchRoute } = useMapRoute();
+	const isTripActive = !!trip && trip.status !== 'COMPLETED' && trip.status !== 'CANCELLED';
+	useDriverLocation({ enabled: isTripActive, tripId });
 
 	const [routeFetched, setRouteFetched] = useState(false);
 

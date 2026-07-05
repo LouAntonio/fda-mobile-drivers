@@ -1,19 +1,9 @@
 import { api } from '../lib/api';
-import type { DriverProfile, DriverStats, DriverDocument, DriverAvailability } from '../types/api';
+import type { DriverProfile, DriverDocument, DriverAvailability } from '../types/api';
 
 export async function fetchMyDriverProfile(): Promise<DriverProfile> {
 	const { data } = await api.get('/drivers/me');
 	return data as DriverProfile;
-}
-
-export async function fetchDriverProfile(id: string): Promise<DriverProfile> {
-	const { data } = await api.get(`/drivers/${id}`);
-	return data as DriverProfile;
-}
-
-export async function fetchDriverStats(id: string): Promise<DriverStats> {
-	const { data } = await api.get(`/drivers/${id}/stats`);
-	return data as DriverStats;
 }
 
 export async function updateAvailability(availability: DriverAvailability): Promise<void> {

@@ -10,7 +10,7 @@ import {
 	logoutUser,
 } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
-import type { ApiResponse, AuthTokens } from '../types/api';
+import type { AuthTokens } from '../types/api';
 
 export function useLogin() {
 	const setAuth = useAuthStore((state) => state.setAuth);
@@ -19,9 +19,9 @@ export function useLogin() {
 		mutationFn: (data: { phoneNumber: string; password: string }) =>
 			loginUser(data),
 		onSuccess: (res) => {
-			const data = res.data as unknown as ApiResponse<AuthTokens>;
-			if (data.data) {
-				setAuth(data.data.user, data.data.accessToken, data.data.refreshToken);
+			const authData = res.data as unknown as AuthTokens;
+			if (authData) {
+				setAuth(authData.user, authData.accessToken, authData.refreshToken);
 			}
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
@@ -79,10 +79,10 @@ export function useGoogleLogin() {
 		login: async (idToken: string) => {
 			try {
 				const res = await loginWithGoogle(idToken);
-				const data = res.data as unknown as ApiResponse<AuthTokens>;
-				if (data.data) {
-					setAuth(data.data.user, data.data.accessToken, data.data.refreshToken);
-					return data.data;
+				const authData = res.data as unknown as AuthTokens;
+				if (authData) {
+					setAuth(authData.user, authData.accessToken, authData.refreshToken);
+					return authData;
 				}
 			} catch (err) {
 				const axiosErr = err as AxiosError<{ msg?: string }>;

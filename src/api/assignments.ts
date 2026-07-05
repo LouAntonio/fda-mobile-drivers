@@ -23,12 +23,4 @@ export async function rejectAssignment(id: string): Promise<TripAssignment> {
 	return data as TripAssignment;
 }
 
-export async function fetchMyAssignments(filters?: {
-	tripId?: string;
-	status?: TripAssignmentStatus;
-	page?: number;
-	limit?: number;
-}): Promise<{ assignments: TripAssignment[]; total: number; page: number; totalPages: number }> {
-	const { data } = await api.get('/trip-assignments', { params: filters });
-	return data as { assignments: TripAssignment[]; total: number; page: number; totalPages: number };
-}
+
