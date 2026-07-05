@@ -9,11 +9,17 @@ import { NavigationContainer } from '@react-navigation/native';
 import { navigationRef } from './src/lib/navigationRef';
 import { useThemeStore } from './src/store/themeStore';
 import { useThemeColors } from './src/hooks/useThemeColors';
+import { registerPushTokenOnServer } from './src/services/notifications';
 import RootNavigator from './src/navigation/RootNavigator';
 
 export default function App() {
 	const { theme } = useThemeStore();
 	const { isDark } = useThemeColors();
+
+	// Registar push token no arranque
+	useEffect(() => {
+		registerPushTokenOnServer();
+	}, []);
 
 	// Sincronizar a preferência do utilizador com a Appearance API
 	useEffect(() => {
