@@ -12,6 +12,7 @@ import {
 	Pressable,
 	Keyboard,
 	TouchableWithoutFeedback,
+	TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -24,7 +25,8 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 import { useDriverProfile } from '../../hooks/useDriverProfile';
 import { useTrips } from '../../hooks/useTrips';
 import { logoutUser } from '../../services/auth';
-import { updateProfile } from '../../services/user';
+import { updateProfile, updateEmergencyContact } from '../../services/user';
+import { sendPhoneVerification, confirmPhoneVerification } from '../../services/phone';
 import { fetchProfile } from '../../api/profile';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -38,6 +40,65 @@ export default function ProfileScreen() {
 	const [showEditModal, setShowEditModal] = useState(false);
 	const [editName, setEditName] = useState('');
 	const [editSurname, setEditSurname] = useState('');
+
+	const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+	const [emergencyName, setEmergencyName] = useState('');
+	const [emergencyPhone, setEmergencyPhone] = useState('');
+
+	const [showPhoneVerificationModal, setShowPhoneVerificationModal] = useState(false);
+	const [phoneOtpSent, setPhoneOtpSent] = useState(false);
+	const [phoneOtpCode, setPhoneOtpCode] = useState('');
+
+	const sendOtpMutation = useMutation({
+		mutationFn: () => sendPhoneVerification(user?.phoneNumber || ''),
+		onSuccess: () => {
+			setPhoneOtpSent(true);
+			Alert.alert('Código enviado', 'Insere o código de verificação enviado para o teu telefone.');
+		},
+		onError: (err: AxiosError<{ msg?: string }>) => {
+			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao enviar código.');
+		},
+	});
+
+	const confirmOtpMutation = useMutation({
+		mutationFn: () => confirmPhoneVerification(phoneOtpCode),
+		onSuccess: () => {
+			setShowPhoneVerificationModal(false);
+			setPhoneOtpSent(false);
+			setPhoneOtpCode('');
+			profileQuery.refetch();
+			refetchDriver();
+			setUser({ ...user!, phoneNumberVerified: true });
+			Alert.alert('Sucesso', 'Telefone verificado com sucesso!');
+		},
+		onError: (err: AxiosError<{ msg?: string }>) => {
+			Alert.alert('Erro', err.response?.data?.msg || 'Código inválido.');
+		},
+	});
+
+	const handlePhoneVerificationPress = () => {
+		if (user?.phoneNumberVerified) return;
+		setPhoneOtpSent(false);
+		setPhoneOtpCode('');
+		setShowPhoneVerificationModal(true);
+	};
+
+	const emergencyMutation = useMutation({
+		mutationFn: () =>
+			updateEmergencyContact({
+				emergencyContactName: emergencyName,
+				emergencyContactPhone: emergencyPhone,
+			}),
+		onSuccess: () => {
+			setShowEmergencyModal(false);
+			profileQuery.refetch();
+			refetchDriver();
+			Alert.alert('Sucesso', 'Contacto de emergência atualizado!');
+		},
+		onError: (err: AxiosError<{ msg?: string }>) => {
+			Alert.alert('Erro', err.response?.data?.msg || 'Erro ao atualizar contacto de emergência.');
+		},
+	});
 
 	const profileQuery = useQuery({
 		queryKey: ['profile'],
@@ -158,7 +219,7 @@ export default function ProfileScreen() {
 						</View>
 					</View>
 				) : (
-					<>
+					<View>
 						{/* Avatar + Name */}
 						<Animated.View entering={FadeInDown.duration(600)} className="items-center mt-4">
 							<View className="w-24 h-24 rounded-full bg-primary items-center justify-center" style={{ elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12 }}>
@@ -169,9 +230,16 @@ export default function ProfileScreen() {
 							<Text className="text-2xl font-black text-secondary dark:text-off-white mt-4">
 								{user?.name || 'Motorista'} {user?.surname || ''}
 							</Text>
-							<Text className="text-sm font-bold text-gray-500 dark:text-gray-400 mt-1">
-								{user?.phoneNumber || '+244 --- --- ---'}
-							</Text>
+							<TouchableOpacity className="flex-row items-center gap-1 mt-1" onPress={handlePhoneVerificationPress} activeOpacity={0.7}>
+								<Text className="text-sm font-bold text-gray-500 dark:text-gray-400">
+									{user?.phoneNumber || '+244 --- --- ---'}
+								</Text>
+								{user?.phoneNumberVerified ? (
+									<Ionicons name="checkmark-circle" size={16} color="#10B981" />
+								) : (
+									<Text className="text-xs font-black text-primary ml-1">Verificar</Text>
+								)}
+							</TouchableOpacity>
 						</Animated.View>
 
 						{/* Stats Row */}
@@ -278,24 +346,47 @@ export default function ProfileScreen() {
 						)}
 
 						{/* Emergency Contact */}
-						{(user?.emergencyContactName || user?.emergencyContactPhone) && (
-							<Animated.View entering={FadeInDown.duration(600).delay(350)} className="mt-5">
-								<View className="flex-row items-center gap-4 p-4 rounded-2xl" style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 }}>
-									<View className="w-11 h-11 rounded-xl items-center justify-center bg-red-500/10">
-										<Ionicons name="medkit-outline" size={22} color="#ED1C24" />
-									</View>
-									<View className="flex-1">
-										{user?.emergencyContactName && (
-											<Text className="text-base font-black text-secondary dark:text-off-white">{user.emergencyContactName}</Text>
-										)}
-										{user?.emergencyContactPhone && (
-											<Text className="text-sm font-bold text-gray-500 dark:text-gray-400 mt-0.5">{user.emergencyContactPhone}</Text>
-										)}
-									</View>
-									<Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+						<Animated.View entering={FadeInDown.duration(600).delay(350)} className="mt-5">
+							<TouchableOpacity
+								className="flex-row items-center gap-4 p-4 rounded-2xl"
+								style={{
+									backgroundColor: isDark ? '#1A1A1A' : '#FFF',
+									elevation: 2,
+									shadowColor: '#000',
+									shadowOffset: { width: 0, height: 2 },
+									shadowOpacity: 0.05,
+									shadowRadius: 8,
+								}}
+								onPress={() => {
+									setEmergencyName(user?.emergencyContactName || '');
+									setEmergencyPhone(user?.emergencyContactPhone || '');
+									setShowEmergencyModal(true);
+								}}
+								activeOpacity={0.7}
+							>
+								<View className="w-11 h-11 rounded-xl items-center justify-center bg-red-500/10">
+									<Ionicons name="medkit-outline" size={22} color="#ED1C24" />
 								</View>
-							</Animated.View>
-						)}
+								<View className="flex-1">
+									{(user?.emergencyContactName || user?.emergencyContactPhone) ? (
+										<>
+											{user?.emergencyContactName && (
+												<Text className="text-base font-black text-secondary dark:text-off-white">{user.emergencyContactName}</Text>
+											)}
+											{user?.emergencyContactPhone && (
+												<Text className="text-sm font-bold text-gray-500 dark:text-gray-400 mt-0.5">{user.emergencyContactPhone}</Text>
+											)}
+										</>
+									) : (
+										<>
+											<Text className="text-base font-black text-secondary dark:text-off-white">Adicionar Contacto de Emergência</Text>
+											<Text className="text-sm font-bold text-gray-500 dark:text-gray-400 mt-0.5">Quem contactar em caso de emergência</Text>
+										</>
+									)}
+								</View>
+								<Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+							</TouchableOpacity>
+						</Animated.View>
 
 						{/* Logout */}
 						<Animated.View entering={FadeInDown.duration(600).delay(400)} className="mt-8 items-center">
@@ -308,9 +399,160 @@ export default function ProfileScreen() {
 						<Animated.View entering={FadeInDown.duration(600).delay(450)} className="mt-4 mb-8 items-center">
 							<Text className="text-xs font-bold text-gray-400">FDA-Drivers v1.0.0</Text>
 						</Animated.View>
-					</>
+					</View>
 				)}
 			</ScrollView>
+
+			{/* Emergency Contact Modal */}
+			<Modal visible={showEmergencyModal} animationType="fade" transparent onRequestClose={() => setShowEmergencyModal(false)}>
+				<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 justify-center">
+					<Pressable className="absolute inset-0 bg-black/50" onPress={() => setShowEmergencyModal(false)} />
+					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+						<Animated.View entering={FadeInDown.duration(300).springify()}>
+							<View className="mx-6 rounded-[32px] p-6" style={{ backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' }}>
+								<View className="items-center mb-6">
+									<View className="w-16 h-16 rounded-full bg-red-500/10 items-center justify-center mb-4">
+										<Ionicons name="medkit-outline" size={32} color="#ED1C24" />
+									</View>
+									<Text className="text-xl font-black text-center" style={{ color: themeColors.text }}>
+										Contacto de Emergência
+									</Text>
+								</View>
+								<Input
+									label="Nome"
+									value={emergencyName}
+									onChangeText={setEmergencyName}
+									placeholder="Nome do contacto"
+									leftIcon="person-outline"
+								/>
+								<Input
+									label="Telefone"
+									value={emergencyPhone}
+									onChangeText={setEmergencyPhone}
+									placeholder="+244 900 000 000"
+									leftIcon="call-outline"
+								/>
+								<View className="flex-row gap-3 mt-4">
+									<TouchableOpacity
+										className="flex-1 py-3.5 rounded-2xl"
+										style={{ backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5' }}
+										onPress={() => setShowEmergencyModal(false)}
+										activeOpacity={0.7}
+									>
+										<Text className="text-center font-bold" style={{ color: themeColors.text }}>Cancelar</Text>
+									</TouchableOpacity>
+									<TouchableOpacity
+										className="flex-1 py-3.5 rounded-2xl"
+										style={{ backgroundColor: '#ED1C24' }}
+										onPress={() => {
+											if (!emergencyName.trim() || !emergencyPhone.trim()) {
+												Alert.alert('Atenção', 'Preenche o nome e o telefone do contacto de emergência.');
+												return;
+											}
+											emergencyMutation.mutate();
+										}}
+										activeOpacity={0.7}
+									>
+										<Text className="text-center font-bold text-white">
+											{emergencyMutation.isPending ? 'A salvar...' : 'Salvar'}
+										</Text>
+									</TouchableOpacity>
+								</View>
+							</View>
+						</Animated.View>
+					</TouchableWithoutFeedback>
+				</KeyboardAvoidingView>
+			</Modal>
+
+			{/* Phone Verification Modal */}
+			<Modal visible={showPhoneVerificationModal} animationType="fade" transparent onRequestClose={() => setShowPhoneVerificationModal(false)}>
+				<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 justify-center">
+					<Pressable className="absolute inset-0 bg-black/50" onPress={() => setShowPhoneVerificationModal(false)} />
+					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+						<Animated.View entering={FadeInDown.duration(300).springify()}>
+							<View className="mx-6 rounded-[32px] p-6" style={{ backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' }}>
+								<View className="items-center mb-6">
+									<View className="w-16 h-16 rounded-full bg-primary/10 items-center justify-center mb-4">
+										<Ionicons name="phone-portrait-outline" size={32} color={themeColors.primary} />
+									</View>
+									<Text className="text-xl font-black text-center" style={{ color: themeColors.text }}>
+										Verificar Telefone
+									</Text>
+									<Text className="text-sm text-center mt-2" style={{ color: themeColors.text + '99' }}>
+										{user?.phoneNumber || '---'}
+									</Text>
+								</View>
+
+								{!phoneOtpSent ? (
+									<TouchableOpacity
+										className="py-3.5 rounded-2xl items-center"
+										style={{ backgroundColor: themeColors.primary }}
+										onPress={() => sendOtpMutation.mutate()}
+										activeOpacity={0.7}
+									>
+										<Text className="font-bold text-secondary">
+											{sendOtpMutation.isPending ? 'A enviar...' : 'Enviar Código de Verificação'}
+										</Text>
+									</TouchableOpacity>
+								) : (
+									<>
+										<TextInput
+											className="w-full px-4 py-3.5 rounded-2xl mb-4 text-base text-center tracking-[8px] font-black"
+											placeholder="0000"
+											placeholderTextColor="#9CA3AF"
+											keyboardType="number-pad"
+											maxLength={6}
+											value={phoneOtpCode}
+											onChangeText={setPhoneOtpCode}
+											style={{
+												backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5',
+												color: themeColors.text,
+											}}
+										/>
+										<View className="flex-row gap-3">
+											<TouchableOpacity
+												className="flex-1 py-3.5 rounded-2xl"
+												style={{ backgroundColor: isDark ? '#2C2C2E' : '#F5F5F5' }}
+												onPress={() => {
+													setPhoneOtpSent(false);
+													setPhoneOtpCode('');
+												}}
+												activeOpacity={0.7}
+											>
+												<Text className="text-center font-bold" style={{ color: themeColors.text }}>Reenviar</Text>
+											</TouchableOpacity>
+											<TouchableOpacity
+												className="flex-1 py-3.5 rounded-2xl"
+												style={{ backgroundColor: themeColors.primary }}
+												onPress={() => {
+													if (!phoneOtpCode.trim()) {
+														Alert.alert('Atenção', 'Insere o código de verificação.');
+														return;
+													}
+													confirmOtpMutation.mutate();
+												}}
+												activeOpacity={0.7}
+											>
+												<Text className="text-center font-bold text-secondary">
+													{confirmOtpMutation.isPending ? 'A verificar...' : 'Confirmar'}
+												</Text>
+											</TouchableOpacity>
+										</View>
+									</>
+								)}
+
+								<TouchableOpacity
+									className="mt-4 py-2 items-center"
+									onPress={() => setShowPhoneVerificationModal(false)}
+									activeOpacity={0.7}
+								>
+									<Text className="text-sm font-bold" style={{ color: themeColors.text + '80' }}>Cancelar</Text>
+								</TouchableOpacity>
+							</View>
+						</Animated.View>
+					</TouchableWithoutFeedback>
+				</KeyboardAvoidingView>
+			</Modal>
 
 			<Modal visible={showEditModal} animationType="slide" transparent onRequestClose={() => setShowEditModal(false)}>
 				<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 justify-end">

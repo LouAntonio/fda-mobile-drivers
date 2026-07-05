@@ -6,7 +6,9 @@ import {
 	RefreshControl,
 	StyleSheet,
 	TouchableOpacity,
+	Alert,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInRight } from 'react-native-reanimated';
@@ -270,6 +272,10 @@ export default function PromotionsScreen() {
 											},
 										]}
 										activeOpacity={0.6}
+										onPress={async () => {
+											await Clipboard.setStringAsync(promo.code);
+											Alert.alert('Copiado', `Código ${promo.code} copiado!`);
+										}}
 									>
 										<Ionicons
 											name="copy-outline"

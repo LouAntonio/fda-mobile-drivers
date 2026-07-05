@@ -4,3 +4,5 @@ declare module '@env' {
 	export const EXPO_REDIRECT_URI: string;
 	export const MAPBOX_ACCESS_TOKEN: string;
 }
+
+declare module 'expo-clipboard';

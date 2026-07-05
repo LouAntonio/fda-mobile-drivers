@@ -5,6 +5,7 @@ import {
 	ScrollView,
 	StyleSheet,
 	TouchableOpacity,
+	Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +19,7 @@ const INFO_SECTIONS: {
 		icon: string;
 		label: string;
 		value?: string;
-		action?: boolean;
+		url?: string;
 	}[];
 }[] = [
 	{
@@ -37,17 +38,17 @@ const INFO_SECTIONS: {
 			{
 				icon: 'document-text-outline',
 				label: 'Termos de Uso',
-				action: true,
+				url: 'https://flashdelivery.co.ao/termos',
 			},
 			{
 				icon: 'shield-checkmark-outline',
 				label: 'Política de Privacidade',
-				action: true,
+				url: 'https://flashdelivery.co.ao/privacidade',
 			},
 			{
 				icon: 'receipt-outline',
 				label: 'Política de Reembolso',
-				action: true,
+				url: 'https://flashdelivery.co.ao/reembolso',
 			},
 		],
 	},
@@ -57,12 +58,12 @@ const INFO_SECTIONS: {
 			{
 				icon: 'help-circle-outline',
 				label: 'FAQ - Perguntas Frequentes',
-				action: true,
+				url: 'https://flashdelivery.co.ao/faq',
 			},
 			{
 				icon: 'book-outline',
 				label: 'Guia do Usuário',
-				action: true,
+				url: 'https://flashdelivery.co.ao/guia',
 			},
 		],
 	},
@@ -162,57 +163,62 @@ export default function InfoScreen() {
 										iIndex * 80,
 									)}
 								>
-									<TouchableOpacity
-										style={[
-											styles.itemRow,
-											iIndex <
-												// eslint-disable-next-line react-native/no-inline-styles
-												section.items.length - 1 && {
-												borderBottomColor:
-													themeColors.border,
-												borderBottomWidth: 0.5,
-											},
-										]}
-										activeOpacity={item.action ? 0.6 : 1}
-										disabled={!item.action}
-									>
-										<View style={styles.itemIconContainer}>
-											<Ionicons
-												name={item.icon as any}
-												size={22}
-												color={themeColors.secondary}
-											/>
-										</View>
-										<View style={styles.itemInfo}>
+								<TouchableOpacity
+									style={[
+										styles.itemRow,
+										iIndex <
+											// eslint-disable-next-line react-native/no-inline-styles
+											section.items.length - 1 && {
+											borderBottomColor:
+												themeColors.border,
+											borderBottomWidth: 0.5,
+										},
+									]}
+									activeOpacity={item.url ? 0.6 : 1}
+									disabled={!item.url}
+									onPress={
+										item.url
+											? () => Linking.openURL(item.url!)
+											: undefined
+									}
+								>
+									<View style={styles.itemIconContainer}>
+										<Ionicons
+											name={item.icon as any}
+											size={22}
+											color={themeColors.secondary}
+										/>
+									</View>
+									<View style={styles.itemInfo}>
+										<Text
+											style={[
+												styles.itemLabel,
+												{ color: themeColors.text },
+											]}
+										>
+											{item.label}
+										</Text>
+										{item.value && (
 											<Text
 												style={[
-													styles.itemLabel,
-													{ color: themeColors.text },
+													styles.itemValue,
+													{
+														color: themeColors.secondary,
+													},
 												]}
 											>
-												{item.label}
+												{item.value}
 											</Text>
-											{item.value && (
-												<Text
-													style={[
-														styles.itemValue,
-														{
-															color: themeColors.secondary,
-														},
-													]}
-												>
-													{item.value}
-												</Text>
-											)}
-										</View>
-										{item.action && (
-											<Ionicons
-												name="chevron-forward"
-												size={20}
-												color={themeColors.border}
-											/>
 										)}
-									</TouchableOpacity>
+									</View>
+									{item.url && (
+										<Ionicons
+											name="chevron-forward"
+											size={20}
+											color={themeColors.border}
+										/>
+									)}
+								</TouchableOpacity>
 								</Animated.View>
 							))}
 						</View>
@@ -237,20 +243,24 @@ export default function InfoScreen() {
 							{
 								icon: 'logo-instagram',
 								label: 'Instagram',
+								url: 'https://instagram.com/flashdeliveryao',
 							},
 							{
 								icon: 'logo-facebook',
 								label: 'Facebook',
+								url: 'https://facebook.com/flashdeliveryao',
 							},
 							{
 								icon: 'logo-twitter',
 								label: 'Twitter / X',
+								url: 'https://twitter.com/flashdeliveryao',
 							},
 						].map((social) => (
 							<TouchableOpacity
 								key={social.label}
 								style={styles.socialItem}
 								activeOpacity={0.6}
+								onPress={() => Linking.openURL(social.url)}
 							>
 								<Ionicons
 									name={social.icon as any}
