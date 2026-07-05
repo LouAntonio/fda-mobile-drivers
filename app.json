@@ -36,16 +36,16 @@
 			"expo-web-browser",
 			"expo-notifications"
 		],
-		"extra": {
-			"eas": {
-				"projectId": "e06035b3-ac23-4b7e-a122-f36b6c556e9c"
-			}
-		},
 		"runtimeVersion": {
 			"policy": "appVersion"
 		},
 		"updates": {
-			"url": "https://u.expo.dev/e06035b3-ac23-4b7e-a122-f36b6c556e9c"
+			"url": "https://u.expo.dev/6d07c40c-27c3-45aa-bf84-c7d8b722a50a"
+		},
+		"extra": {
+			"eas": {
+				"projectId": "6d07c40c-27c3-45aa-bf84-c7d8b722a50a"
+			}
 		}
 	}
 }
