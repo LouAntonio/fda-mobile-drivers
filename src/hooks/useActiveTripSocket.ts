@@ -16,7 +16,7 @@ export function useActiveTripSocket({
 	const accessToken = useAuthStore((state) => state.accessToken);
 	const queryClient = useQueryClient();
 
-	const [clientLocation, setClientLocation] = useState<{
+	const [driverLocation, setDriverLocation] = useState<{
 		lat: number;
 		lng: number;
 	} | null>(null);
@@ -54,7 +54,7 @@ export function useActiveTripSocket({
 			'trip:location',
 			(data: { lat: number; lng: number }) => {
 				if (data?.lat && data?.lng) {
-					setClientLocation({ lat: data.lat, lng: data.lng });
+					setDriverLocation({ lat: data.lat, lng: data.lng });
 				}
 			},
 		);
@@ -79,9 +79,9 @@ export function useActiveTripSocket({
 				cleanup();
 			}
 			cleanupFns.current = [];
-			setClientLocation(null);
+			setDriverLocation(null);
 		};
 	}, [tripId, enabled, accessToken, connect, queryClient]);
 
-	return { connect, disconnect, clientLocation };
+	return { connect, disconnect, driverLocation };
 }
