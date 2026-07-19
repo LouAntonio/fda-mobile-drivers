@@ -1,7 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import { AxiosError } from 'axios';
-import { fetchAddresses, createAddress, deleteAddress } from '../api/address';
+import {
+	fetchAddresses,
+	createAddress,
+	updateAddress,
+	deleteAddress,
+} from '../api/address';
 import { useAuthStore } from '../store/authStore';
 import type { AddressLabel, UserAddress, ApiResponse } from '../types/api';
 
@@ -43,6 +48,35 @@ export function useAddresses() {
 		},
 	});
 
+	const updateMutation = useMutation({
+		mutationFn: async ({
+			addressId,
+			data,
+		}: {
+			addressId: string;
+			data: {
+				label?: AddressLabel;
+				customLabel?: string;
+				address?: string;
+				reference?: string;
+				lat?: number;
+				lng?: number;
+			};
+		}) => {
+			await updateAddress(userId!, addressId, data);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['addresses', userId] });
+			Alert.alert('Sucesso', 'Endereço atualizado!');
+		},
+		onError: (err: AxiosError<{ msg?: string }>) => {
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao atualizar endereço.',
+			);
+		},
+	});
+
 	const deleteMutation = useMutation({
 		mutationFn: async (addressId: string) => {
 			await deleteAddress(userId!, addressId);
@@ -65,6 +99,8 @@ export function useAddresses() {
 		refetch: query.refetch,
 		createAddress: createMutation.mutate,
 		isCreating: createMutation.isPending,
+		updateAddress: updateMutation.mutate,
+		isUpdating: updateMutation.isPending,
 		deleteAddress: deleteMutation.mutate,
 		isDeleting: deleteMutation.isPending,
 	};

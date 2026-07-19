@@ -20,6 +20,7 @@ export type MainStackParamList = {
 	DriverEarnings: undefined;
 	DriverDocuments: undefined;
 	DriverVehicle: undefined;
+	Addresses: undefined;
 };
 
 export type RootStackParamList = {

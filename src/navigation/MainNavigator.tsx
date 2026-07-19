@@ -12,6 +12,7 @@ import TripDetailScreen from '../screens/main/TripDetailScreen';
 import DriverEarningsScreen from '../screens/main/DriverEarningsScreen';
 import DriverDocumentsScreen from '../screens/main/DriverDocumentsScreen';
 import DriverVehicleScreen from '../screens/main/DriverVehicleScreen';
+import AddressesScreen from '../screens/main/AddressesScreen';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -40,6 +41,10 @@ export default function MainNavigator() {
 			<Stack.Screen
 				name="DriverVehicle"
 				component={DriverVehicleScreen}
+			/>
+			<Stack.Screen
+				name="Addresses"
+				component={AddressesScreen}
 			/>
 		</Stack.Navigator>
 	);

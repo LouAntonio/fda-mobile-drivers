@@ -21,6 +21,26 @@ export function createAddress(userId: string, data: CreateAddressParams) {
 	);
 }
 
+type UpdateAddressParams = {
+	label?: AddressLabel;
+	customLabel?: string;
+	address?: string;
+	reference?: string;
+	lat?: number;
+	lng?: number;
+};
+
+export function updateAddress(
+	userId: string,
+	addressId: string,
+	data: UpdateAddressParams,
+) {
+	return api.patch<ApiResponse<UserAddress>>(
+		`/users/${userId}/addresses/${addressId}`,
+		data,
+	);
+}
+
 export function deleteAddress(userId: string, addressId: string) {
 	return api.delete<ApiResponse<never>>(
 		`/users/${userId}/addresses/${addressId}`,
