@@ -56,5 +56,14 @@
 		"react-native-dotenv": "^3.4.11",
 		"typescript": "~5.9.2"
 	},
-	"private": true
+	"private": true,
+	"expo": {
+		"install": {
+			"exclude": [
+				"expo",
+				"expo-updates",
+				"expo-image-picker"
+			]
+		}
+	}
 }

@@ -42,10 +42,7 @@ export default function MainNavigator() {
 				name="DriverVehicle"
 				component={DriverVehicleScreen}
 			/>
-			<Stack.Screen
-				name="Addresses"
-				component={AddressesScreen}
-			/>
+			<Stack.Screen name="Addresses" component={AddressesScreen} />
 		</Stack.Navigator>
 	);
 }

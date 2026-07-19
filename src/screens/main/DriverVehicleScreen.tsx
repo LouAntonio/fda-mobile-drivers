@@ -61,9 +61,13 @@ export default function DriverVehicleScreen() {
 	const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
 	const pickVehiclePhoto = async () => {
-		const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+		const permission =
+			await ImagePicker.requestMediaLibraryPermissionsAsync();
 		if (!permission.granted) {
-			Alert.alert('Permissão', 'É necessário permitir o acesso à galeria');
+			Alert.alert(
+				'Permissão',
+				'É necessário permitir o acesso à galeria',
+			);
 			return;
 		}
 		const result = await ImagePicker.launchImageLibraryAsync({
@@ -73,7 +77,10 @@ export default function DriverVehicleScreen() {
 		if (result.canceled) return;
 		setUploadingPhoto(true);
 		try {
-			const url = await uploadToCloudinary(result.assets[0].uri, 'vehicles');
+			const url = await uploadToCloudinary(
+				result.assets[0].uri,
+				'vehicles',
+			);
 			setPhotoUrl(url);
 		} catch {
 			Alert.alert('Erro', 'Falha ao carregar foto');
@@ -95,7 +102,14 @@ export default function DriverVehicleScreen() {
 			return;
 		}
 		createMutation.mutate(
-			{ plateNumber, brand, model, color, type, photoUrl: photoUrl || undefined },
+			{
+				plateNumber,
+				brand,
+				model,
+				color,
+				type,
+				photoUrl: photoUrl || undefined,
+			},
 			{
 				onSuccess: () => {
 					setShowAddModal(false);
@@ -123,7 +137,14 @@ export default function DriverVehicleScreen() {
 		updateMutation.mutate(
 			{
 				id: editingVehicle.id,
-				payload: { plateNumber, brand, model, color, type, photoUrl: photoUrl || undefined },
+				payload: {
+					plateNumber,
+					brand,
+					model,
+					color,
+					type,
+					photoUrl: photoUrl || undefined,
+				},
 			},
 			{
 				onSuccess: () => {
@@ -339,10 +360,11 @@ export default function DriverVehicleScreen() {
 																{
 																	text: 'Remover',
 																	style: 'destructive',
-																	onPress: () =>
-																		deleteMutation.mutate(
-																			vehicle.id,
-																		),
+																	onPress:
+																		() =>
+																			deleteMutation.mutate(
+																				vehicle.id,
+																			),
 																},
 															],
 														);
@@ -542,16 +564,30 @@ export default function DriverVehicleScreen() {
 							}}
 						>
 							{uploadingPhoto ? (
-								<ActivityIndicator color={themeColors.primary} size="small" />
+								<ActivityIndicator
+									color={themeColors.primary}
+									size="small"
+								/>
 							) : photoUrl ? (
 								<View className="flex-row items-center gap-2">
-									<Image source={{ uri: photoUrl }} className="w-8 h-8 rounded-lg" />
-									<Text className="text-sm font-black text-primary">Alterar Foto</Text>
+									<Image
+										source={{ uri: photoUrl }}
+										className="w-8 h-8 rounded-lg"
+									/>
+									<Text className="text-sm font-black text-primary">
+										Alterar Foto
+									</Text>
 								</View>
 							) : (
 								<View className="flex-row items-center gap-2">
-									<Ionicons name="camera-outline" size={20} color={themeColors.primary} />
-									<Text className="text-sm font-black text-primary">Adicionar Foto</Text>
+									<Ionicons
+										name="camera-outline"
+										size={20}
+										color={themeColors.primary}
+									/>
+									<Text className="text-sm font-black text-primary">
+										Adicionar Foto
+									</Text>
 								</View>
 							)}
 						</TouchableOpacity>
@@ -734,16 +770,30 @@ export default function DriverVehicleScreen() {
 							}}
 						>
 							{uploadingPhoto ? (
-								<ActivityIndicator color={themeColors.primary} size="small" />
+								<ActivityIndicator
+									color={themeColors.primary}
+									size="small"
+								/>
 							) : photoUrl ? (
 								<View className="flex-row items-center gap-2">
-									<Image source={{ uri: photoUrl }} className="w-8 h-8 rounded-lg" />
-									<Text className="text-sm font-black text-primary">Alterar Foto</Text>
+									<Image
+										source={{ uri: photoUrl }}
+										className="w-8 h-8 rounded-lg"
+									/>
+									<Text className="text-sm font-black text-primary">
+										Alterar Foto
+									</Text>
 								</View>
 							) : (
 								<View className="flex-row items-center gap-2">
-									<Ionicons name="camera-outline" size={20} color={themeColors.primary} />
-									<Text className="text-sm font-black text-primary">Adicionar Foto</Text>
+									<Ionicons
+										name="camera-outline"
+										size={20}
+										color={themeColors.primary}
+									/>
+									<Text className="text-sm font-black text-primary">
+										Adicionar Foto
+									</Text>
 								</View>
 							)}
 						</TouchableOpacity>

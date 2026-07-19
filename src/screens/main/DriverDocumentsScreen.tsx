@@ -112,7 +112,11 @@ export default function DriverDocumentsScreen() {
 			: await ImagePicker.requestMediaLibraryPermissionsAsync();
 
 		if (!permission.granted) {
-			Alert.alert('Permissão', 'É necessário permitir o acesso à ' + (fromCamera ? 'câmara' : 'galeria'));
+			Alert.alert(
+				'Permissão',
+				'É necessário permitir o acesso à ' +
+					(fromCamera ? 'câmara' : 'galeria'),
+			);
 			return;
 		}
 
@@ -471,16 +475,29 @@ export default function DriverDocumentsScreen() {
 									disabled={uploadingFile}
 									className="flex-1 flex-row items-center justify-center py-3.5 rounded-2xl border"
 									style={{
-										backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
-										borderColor: isDark ? '#333' : '#E5E7EB',
+										backgroundColor: isDark
+											? '#2A2A2A'
+											: '#F9FAFB',
+										borderColor: isDark
+											? '#333'
+											: '#E5E7EB',
 									}}
 								>
 									{uploadingFile ? (
-										<ActivityIndicator color={themeColors.primary} size="small" />
+										<ActivityIndicator
+											color={themeColors.primary}
+											size="small"
+										/>
 									) : (
 										<>
-											<Ionicons name="images-outline" size={20} color={themeColors.primary} />
-											<Text className="text-sm font-black text-primary ml-2">Galeria</Text>
+											<Ionicons
+												name="images-outline"
+												size={20}
+												color={themeColors.primary}
+											/>
+											<Text className="text-sm font-black text-primary ml-2">
+												Galeria
+											</Text>
 										</>
 									)}
 								</TouchableOpacity>
@@ -489,16 +506,29 @@ export default function DriverDocumentsScreen() {
 									disabled={uploadingFile}
 									className="flex-1 flex-row items-center justify-center py-3.5 rounded-2xl border"
 									style={{
-										backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
-										borderColor: isDark ? '#333' : '#E5E7EB',
+										backgroundColor: isDark
+											? '#2A2A2A'
+											: '#F9FAFB',
+										borderColor: isDark
+											? '#333'
+											: '#E5E7EB',
 									}}
 								>
 									{uploadingFile ? (
-										<ActivityIndicator color={themeColors.primary} size="small" />
+										<ActivityIndicator
+											color={themeColors.primary}
+											size="small"
+										/>
 									) : (
 										<>
-											<Ionicons name="camera-outline" size={20} color={themeColors.primary} />
-											<Text className="text-sm font-black text-primary ml-2">Câmara</Text>
+											<Ionicons
+												name="camera-outline"
+												size={20}
+												color={themeColors.primary}
+											/>
+											<Text className="text-sm font-black text-primary ml-2">
+												Câmara
+											</Text>
 										</>
 									)}
 								</TouchableOpacity>

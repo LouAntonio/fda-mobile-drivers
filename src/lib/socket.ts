@@ -24,11 +24,11 @@ export function connectSocket(token: string): Socket {
 		// connected
 	});
 
-	socket.on('disconnect', (reason) => {
+	socket.on('disconnect', (_reason) => {
 		// disconnected: reason
 	});
 
-	socket.on('error', (err: { message: string }) => {
+	socket.on('error', (_err: { message: string }) => {
 		// socket error: err.message
 	});
 
