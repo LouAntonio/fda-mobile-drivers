@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../hooks/useThemeColors';
@@ -23,6 +24,7 @@ import {
 	useDriverDocuments,
 	useUploadDocument,
 } from '../../hooks/useDriverDocuments';
+import { uploadToCloudinary } from '../../lib/upload';
 import type { DocumentStatus } from '../../types/api';
 
 const STATUS_CONFIG: Record<
@@ -100,12 +102,48 @@ export default function DriverDocumentsScreen() {
 	const [selectedType, setSelectedType] = useState('bi');
 	const [fileUrl, setFileUrl] = useState('');
 	const [expiryDate, setExpiryDate] = useState('');
+	const [uploadingFile, setUploadingFile] = useState(false);
 
 	const complianceStatus = driverProfile?.complianceStatus;
 
+	const pickImage = async (fromCamera: boolean) => {
+		const permission = fromCamera
+			? await ImagePicker.requestCameraPermissionsAsync()
+			: await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+		if (!permission.granted) {
+			Alert.alert('Permissão', 'É necessário permitir o acesso à ' + (fromCamera ? 'câmara' : 'galeria'));
+			return;
+		}
+
+		const result = fromCamera
+			? await ImagePicker.launchCameraAsync({
+					mediaTypes: ['images'],
+					quality: 0.8,
+				})
+			: await ImagePicker.launchImageLibraryAsync({
+					mediaTypes: ['images'],
+					quality: 0.8,
+				});
+
+		if (result.canceled) return;
+
+		setUploadingFile(true);
+		try {
+			const uri = result.assets[0].uri;
+			const uploadedUrl = await uploadToCloudinary(uri, 'documents');
+			setFileUrl(uploadedUrl);
+			Alert.alert('Sucesso', 'Ficheiro carregado com sucesso');
+		} catch {
+			Alert.alert('Erro', 'Falha ao carregar ficheiro');
+		} finally {
+			setUploadingFile(false);
+		}
+	};
+
 	const handleUpload = () => {
 		if (!fileUrl.trim()) {
-			Alert.alert('Atenção', 'Insira o URL do documento');
+			Alert.alert('Atenção', 'Selecione ou insira o URL do documento');
 			return;
 		}
 		uploadMutation.mutate(
@@ -424,6 +462,51 @@ export default function DriverDocumentsScreen() {
 								})}
 							</View>
 
+							<Text className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+								Selecionar Ficheiro
+							</Text>
+							<View className="flex-row gap-3 mb-4">
+								<TouchableOpacity
+									onPress={() => pickImage(false)}
+									disabled={uploadingFile}
+									className="flex-1 flex-row items-center justify-center py-3.5 rounded-2xl border"
+									style={{
+										backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
+										borderColor: isDark ? '#333' : '#E5E7EB',
+									}}
+								>
+									{uploadingFile ? (
+										<ActivityIndicator color={themeColors.primary} size="small" />
+									) : (
+										<>
+											<Ionicons name="images-outline" size={20} color={themeColors.primary} />
+											<Text className="text-sm font-black text-primary ml-2">Galeria</Text>
+										</>
+									)}
+								</TouchableOpacity>
+								<TouchableOpacity
+									onPress={() => pickImage(true)}
+									disabled={uploadingFile}
+									className="flex-1 flex-row items-center justify-center py-3.5 rounded-2xl border"
+									style={{
+										backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
+										borderColor: isDark ? '#333' : '#E5E7EB',
+									}}
+								>
+									{uploadingFile ? (
+										<ActivityIndicator color={themeColors.primary} size="small" />
+									) : (
+										<>
+											<Ionicons name="camera-outline" size={20} color={themeColors.primary} />
+											<Text className="text-sm font-black text-primary ml-2">Câmara</Text>
+										</>
+									)}
+								</TouchableOpacity>
+							</View>
+
+							<Text className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+								Ou insira URL manualmente
+							</Text>
 							<View
 								className="px-4 py-3.5 rounded-2xl border mb-3"
 								style={{

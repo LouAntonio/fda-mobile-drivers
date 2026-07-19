@@ -11,9 +11,11 @@ import {
 	Pressable,
 	KeyboardAvoidingView,
 	Platform,
+	Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../hooks/useThemeColors';
@@ -25,6 +27,7 @@ import {
 	useDeleteVehicle,
 } from '../../hooks/useVehicles';
 import { useDriverProfile } from '../../hooks/useDriverProfile';
+import { uploadToCloudinary } from '../../lib/upload';
 import type { VehicleType, VehicleItem } from '../../types/api';
 
 const VEHICLE_TYPES: { label: string; value: VehicleType; icon: string }[] = [
@@ -54,6 +57,31 @@ export default function DriverVehicleScreen() {
 		null,
 	);
 
+	const [photoUrl, setPhotoUrl] = useState('');
+	const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+	const pickVehiclePhoto = async () => {
+		const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+		if (!permission.granted) {
+			Alert.alert('Permissão', 'É necessário permitir o acesso à galeria');
+			return;
+		}
+		const result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ['images'],
+			quality: 0.8,
+		});
+		if (result.canceled) return;
+		setUploadingPhoto(true);
+		try {
+			const url = await uploadToCloudinary(result.assets[0].uri, 'vehicles');
+			setPhotoUrl(url);
+		} catch {
+			Alert.alert('Erro', 'Falha ao carregar foto');
+		} finally {
+			setUploadingPhoto(false);
+		}
+	};
+
 	const activeVehicleId = driverProfile?.activeVehicleId;
 
 	const handleAddVehicle = () => {
@@ -67,7 +95,7 @@ export default function DriverVehicleScreen() {
 			return;
 		}
 		createMutation.mutate(
-			{ plateNumber, brand, model, color, type },
+			{ plateNumber, brand, model, color, type, photoUrl: photoUrl || undefined },
 			{
 				onSuccess: () => {
 					setShowAddModal(false);
@@ -75,6 +103,7 @@ export default function DriverVehicleScreen() {
 					setBrand('');
 					setModel('');
 					setColor('');
+					setPhotoUrl('');
 				},
 			},
 		);
@@ -94,7 +123,7 @@ export default function DriverVehicleScreen() {
 		updateMutation.mutate(
 			{
 				id: editingVehicle.id,
-				payload: { plateNumber, brand, model, color, type },
+				payload: { plateNumber, brand, model, color, type, photoUrl: photoUrl || undefined },
 			},
 			{
 				onSuccess: () => {
@@ -112,6 +141,7 @@ export default function DriverVehicleScreen() {
 		setModel(vehicle.model);
 		setColor(vehicle.color);
 		setType(vehicle.type);
+		setPhotoUrl(vehicle.photoUrl ?? '');
 		setShowEditModal(true);
 	};
 
@@ -499,6 +529,33 @@ export default function DriverVehicleScreen() {
 							/>
 						</View>
 
+						<Text className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+							Foto do Veículo
+						</Text>
+						<TouchableOpacity
+							onPress={pickVehiclePhoto}
+							disabled={uploadingPhoto}
+							className="flex-row items-center justify-center py-3.5 rounded-2xl border mb-5"
+							style={{
+								backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
+								borderColor: isDark ? '#333' : '#E5E7EB',
+							}}
+						>
+							{uploadingPhoto ? (
+								<ActivityIndicator color={themeColors.primary} size="small" />
+							) : photoUrl ? (
+								<View className="flex-row items-center gap-2">
+									<Image source={{ uri: photoUrl }} className="w-8 h-8 rounded-lg" />
+									<Text className="text-sm font-black text-primary">Alterar Foto</Text>
+								</View>
+							) : (
+								<View className="flex-row items-center gap-2">
+									<Ionicons name="camera-outline" size={20} color={themeColors.primary} />
+									<Text className="text-sm font-black text-primary">Adicionar Foto</Text>
+								</View>
+							)}
+						</TouchableOpacity>
+
 						<TouchableOpacity
 							onPress={handleAddVehicle}
 							className="py-4 rounded-2xl items-center bg-primary active:opacity-70"
@@ -663,6 +720,33 @@ export default function DriverVehicleScreen() {
 								onChangeText={setColor}
 							/>
 						</View>
+
+						<Text className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+							Foto do Veículo
+						</Text>
+						<TouchableOpacity
+							onPress={pickVehiclePhoto}
+							disabled={uploadingPhoto}
+							className="flex-row items-center justify-center py-3.5 rounded-2xl border mb-5"
+							style={{
+								backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
+								borderColor: isDark ? '#333' : '#E5E7EB',
+							}}
+						>
+							{uploadingPhoto ? (
+								<ActivityIndicator color={themeColors.primary} size="small" />
+							) : photoUrl ? (
+								<View className="flex-row items-center gap-2">
+									<Image source={{ uri: photoUrl }} className="w-8 h-8 rounded-lg" />
+									<Text className="text-sm font-black text-primary">Alterar Foto</Text>
+								</View>
+							) : (
+								<View className="flex-row items-center gap-2">
+									<Ionicons name="camera-outline" size={20} color={themeColors.primary} />
+									<Text className="text-sm font-black text-primary">Adicionar Foto</Text>
+								</View>
+							)}
+						</TouchableOpacity>
 
 						<TouchableOpacity
 							onPress={handleEditVehicle}
