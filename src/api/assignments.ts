@@ -11,6 +11,7 @@ export interface TripOffer {
 	totalPrice: number;
 	driverId: string;
 	driverName: string;
+	offerTimeoutMs?: number;
 }
 
 export async function acceptAssignment(id: string): Promise<TripAssignment> {

@@ -40,6 +40,22 @@ export function useTripOfferListener() {
 			},
 		);
 
+		const unsubAccepted = socketManager.on(
+			'trip:offer_accepted',
+			(data) => {
+				setCurrentOffer((prev) => {
+					if (prev && data.assignmentId === prev.assignmentId) {
+						Alert.alert(
+							'Viagem Aceite',
+							'Esta viagem foi aceite por outro motorista.',
+						);
+						return null;
+					}
+					return prev;
+				});
+			},
+		);
+
 		const unsubError = socketManager.on('error', (data) => {
 			console.warn('[Socket error]', data.message);
 		});
@@ -47,6 +63,7 @@ export function useTripOfferListener() {
 		return () => {
 			unsubOffer();
 			unsubExpired();
+			unsubAccepted();
 			unsubError();
 			setCurrentOffer(null);
 		};

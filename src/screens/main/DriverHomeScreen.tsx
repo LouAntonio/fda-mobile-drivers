@@ -161,6 +161,32 @@ export default function DriverHomeScreen() {
 		return () => sub.remove();
 	}, [refetch]);
 
+	const [countdownSec, setCountdownSec] = useState(0);
+
+	useEffect(() => {
+		if (!currentOffer) {
+			setCountdownSec(0);
+			return;
+		}
+
+		const totalMs = currentOffer.offerTimeoutMs ?? 30000;
+		const interval = 1000;
+		const totalSec = Math.floor(totalMs / interval);
+		let remaining = totalSec;
+
+		setCountdownSec(remaining);
+
+		const timer = setInterval(() => {
+			remaining -= 1;
+			setCountdownSec(remaining);
+			if (remaining <= 0) {
+				clearInterval(timer);
+			}
+		}, interval);
+
+		return () => clearInterval(timer);
+	}, [currentOffer]);
+
 	return (
 		<SafeAreaView className="flex-1 bg-off-white dark:bg-[#090909]">
 			<SideMenu
@@ -391,6 +417,36 @@ export default function DriverHomeScreen() {
 								</Text>
 							</View>
 						</View>
+
+						{/* Countdown Timer */}
+						{countdownSec > 0 && (
+							<View className="items-center mb-4">
+								<View
+									className="w-14 h-14 rounded-full items-center justify-center"
+									style={{
+										backgroundColor:
+											countdownSec <= 5
+												? 'rgba(239,68,68,0.15)'
+												: 'rgba(16,185,129,0.15)',
+									}}
+								>
+									<Text
+										className="text-2xl font-black"
+										style={{
+											color:
+												countdownSec <= 5
+													? '#EF4444'
+													: '#10B981',
+										}}
+									>
+										{countdownSec}
+									</Text>
+								</View>
+								<Text className="text-xs font-bold text-gray-400 mt-1">
+									segundos
+								</Text>
+							</View>
+						)}
 
 						{currentOffer && (
 							<View className="gap-4 mb-6">

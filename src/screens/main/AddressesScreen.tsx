@@ -11,6 +11,7 @@ import {
 	Keyboard,
 	TouchableWithoutFeedback,
 	RefreshControl,
+	Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,9 +19,11 @@ import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useAddresses } from '../../hooks/useAddresses';
+import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { AddressListSkeleton } from '../../components/skeletons/AddressSkeleton';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
+import MapView from '../../components/MapView';
 import type { AddressLabel } from '../../types/api';
 
 const LABEL_OPTIONS: { label: string; value: AddressLabel; icon: string }[] = [
@@ -44,6 +47,7 @@ const LABEL_BG: Record<string, string> = {
 export default function AddressesScreen() {
 	const navigation = useNavigation();
 	const { themeColors, isDark } = useThemeColors();
+	const { location: currentLocation } = useCurrentLocation();
 	const {
 		addresses,
 		isLoading,
@@ -64,16 +68,24 @@ export default function AddressesScreen() {
 	const [newLabel, setNewLabel] = useState('');
 	const [newAddress, setNewAddress] = useState('');
 	const [selectedLabel, setSelectedLabel] = useState<AddressLabel>('OTHER');
+	const [selectedCoords, setSelectedCoords] = useState<{
+		lat: number;
+		lng: number;
+	} | null>(null);
 
 	const handleAdd = () => {
 		if (!newLabel || !newAddress) return;
+		const coords = selectedCoords ?? {
+			lat: currentLocation?.latitude ?? -8.8399,
+			lng: currentLocation?.longitude ?? 13.2344,
+		};
 		createAddress(
 			{
 				label: selectedLabel,
 				customLabel: selectedLabel === 'OTHER' ? newLabel : undefined,
 				address: newAddress,
-				lat: -8.8399,
-				lng: 13.2344,
+				lat: coords.lat,
+				lng: coords.lng,
 			},
 			{
 				onSuccess: () => {
@@ -315,6 +327,45 @@ export default function AddressesScreen() {
 										color={isDark ? '#FFF' : '#000'}
 									/>
 								</TouchableOpacity>
+							</View>
+
+							<View
+								className="h-48 rounded-2xl overflow-hidden mb-4"
+								style={{
+									borderWidth: 1,
+									borderColor: isDark ? '#333' : '#E5E7EB',
+								}}
+							>
+								<MapView
+									style={{ flex: 1 }}
+									initialRegion={{
+										latitude:
+											currentLocation?.latitude ??
+											-8.8399,
+										longitude:
+											currentLocation?.longitude ??
+											13.2344,
+										latitudeDelta: 0.05,
+										longitudeDelta: 0.05,
+									}}
+									onPress={(lat, lng) =>
+										setSelectedCoords({ lat, lng })
+									}
+									markers={[
+										{
+											id: 'selected',
+											latitude:
+												selectedCoords?.lat ??
+												currentLocation?.latitude ??
+												-8.8399,
+											longitude:
+												selectedCoords?.lng ??
+												currentLocation?.longitude ??
+												13.2344,
+											title: 'Local selecionado',
+										},
+									]}
+								/>
 							</View>
 
 							<Text className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">

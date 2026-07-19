@@ -60,6 +60,7 @@ export interface TripOfferEvent {
 	totalPrice: number;
 	driverId: string;
 	driverName: string;
+	offerTimeoutMs?: number;
 }
 
 export interface TripOfferAcceptedEvent {
