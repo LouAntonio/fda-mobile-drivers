@@ -10,8 +10,6 @@ export function useGoogleAuth() {
 		redirectUri: EXPO_REDIRECT_URI,
 	});
 
-	console.log('URI', EXPO_REDIRECT_URI);
-
 	return {
 		promptAsync,
 		request,

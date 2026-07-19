@@ -21,15 +21,15 @@ export function connectSocket(token: string): Socket {
 	});
 
 	socket.on('connect', () => {
-		console.log('[Socket] Conectado ao namespace /trips');
+		// connected
 	});
 
 	socket.on('disconnect', (reason) => {
-		console.log('[Socket] Desconectado:', reason);
+		// disconnected: reason
 	});
 
 	socket.on('error', (err: { message: string }) => {
-		console.error('[Socket] Erro:', err.message);
+		// socket error: err.message
 	});
 
 	return socket;

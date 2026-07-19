@@ -20,11 +20,12 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 import {
 	useVehicles,
 	useCreateVehicle,
+	useUpdateVehicle,
 	useSetActiveVehicle,
 	useDeleteVehicle,
 } from '../../hooks/useVehicles';
 import { useDriverProfile } from '../../hooks/useDriverProfile';
-import type { VehicleType } from '../../types/api';
+import type { VehicleType, VehicleItem } from '../../types/api';
 
 const VEHICLE_TYPES: { label: string; value: VehicleType; icon: string }[] = [
 	{ label: 'Mota', value: 'MOTO', icon: 'bicycle' },
@@ -37,6 +38,7 @@ export default function DriverVehicleScreen() {
 	const { data: vehicles, isLoading } = useVehicles();
 	const { data: driverProfile } = useDriverProfile();
 	const createMutation = useCreateVehicle();
+	const updateMutation = useUpdateVehicle();
 	const setActiveMutation = useSetActiveVehicle();
 	const deleteMutation = useDeleteVehicle();
 
@@ -46,6 +48,11 @@ export default function DriverVehicleScreen() {
 	const [model, setModel] = useState('');
 	const [color, setColor] = useState('');
 	const [type, setType] = useState<VehicleType>('MOTO');
+
+	const [showEditModal, setShowEditModal] = useState(false);
+	const [editingVehicle, setEditingVehicle] = useState<VehicleItem | null>(
+		null,
+	);
 
 	const activeVehicleId = driverProfile?.activeVehicleId;
 
@@ -71,6 +78,41 @@ export default function DriverVehicleScreen() {
 				},
 			},
 		);
+	};
+
+	const handleEditVehicle = () => {
+		if (!editingVehicle) return;
+		if (
+			!plateNumber.trim() ||
+			!brand.trim() ||
+			!model.trim() ||
+			!color.trim()
+		) {
+			Alert.alert('Atenção', 'Preencha todos os campos');
+			return;
+		}
+		updateMutation.mutate(
+			{
+				id: editingVehicle.id,
+				payload: { plateNumber, brand, model, color, type },
+			},
+			{
+				onSuccess: () => {
+					setShowEditModal(false);
+					setEditingVehicle(null);
+				},
+			},
+		);
+	};
+
+	const openEditModal = (vehicle: VehicleItem) => {
+		setEditingVehicle(vehicle);
+		setPlateNumber(vehicle.plateNumber);
+		setBrand(vehicle.brand);
+		setModel(vehicle.model);
+		setColor(vehicle.color);
+		setType(vehicle.type);
+		setShowEditModal(true);
 	};
 
 	return (
@@ -238,33 +280,50 @@ export default function DriverVehicleScreen() {
 											)}
 
 										{!isActive && (
-											<TouchableOpacity
-												onPress={() => {
-													Alert.alert(
-														'Remover Veículo',
-														'Tem certeza?',
-														[
-															{
-																text: 'Cancelar',
-																style: 'cancel',
-															},
-															{
-																text: 'Remover',
-																style: 'destructive',
-																onPress: () =>
-																	deleteMutation.mutate(
-																		vehicle.id,
-																	),
-															},
-														],
-													);
-												}}
-												className="mt-2 py-2 rounded-xl items-center"
-											>
-												<Text className="text-xs font-black text-red-500">
-													Remover
-												</Text>
-											</TouchableOpacity>
+											<View className="flex-row gap-2 mt-2">
+												<TouchableOpacity
+													onPress={() =>
+														openEditModal(vehicle)
+													}
+													className="flex-1 py-2 rounded-xl items-center border"
+													style={{
+														borderColor: isDark
+															? '#333'
+															: '#E5E7EB',
+													}}
+												>
+													<Text className="text-xs font-black text-primary">
+														Editar
+													</Text>
+												</TouchableOpacity>
+												<TouchableOpacity
+													onPress={() => {
+														Alert.alert(
+															'Remover Veículo',
+															'Tem certeza?',
+															[
+																{
+																	text: 'Cancelar',
+																	style: 'cancel',
+																},
+																{
+																	text: 'Remover',
+																	style: 'destructive',
+																	onPress: () =>
+																		deleteMutation.mutate(
+																			vehicle.id,
+																		),
+																},
+															],
+														);
+													}}
+													className="flex-1 py-2 rounded-xl items-center"
+												>
+													<Text className="text-xs font-black text-red-500">
+														Remover
+													</Text>
+												</TouchableOpacity>
+											</View>
 										)}
 									</View>
 								</Animated.View>
@@ -450,6 +509,171 @@ export default function DriverVehicleScreen() {
 							) : (
 								<Text className="text-base font-black text-secondary">
 									Cadastrar
+								</Text>
+							)}
+						</TouchableOpacity>
+					</View>
+				</KeyboardAvoidingView>
+			</Modal>
+
+			{/* Edit Modal */}
+			<Modal
+				visible={showEditModal}
+				animationType="slide"
+				transparent
+				onRequestClose={() => {
+					setShowEditModal(false);
+					setEditingVehicle(null);
+				}}
+			>
+				<KeyboardAvoidingView
+					behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+					className="flex-1 justify-end"
+				>
+					<Pressable
+						className="absolute inset-0 bg-black/50"
+						onPress={() => {
+							setShowEditModal(false);
+							setEditingVehicle(null);
+						}}
+					/>
+					<View
+						className={`rounded-t-3xl p-6 pb-10 ${isDark ? 'bg-[#121212]' : 'bg-white'}`}
+					>
+						<View className="flex-row items-center justify-between mb-6">
+							<Text
+								className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}
+							>
+								Editar Veículo
+							</Text>
+							<TouchableOpacity
+								onPress={() => {
+									setShowEditModal(false);
+									setEditingVehicle(null);
+								}}
+								className="w-8 h-8 items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full"
+							>
+								<Ionicons
+									name="close"
+									size={20}
+									color={isDark ? '#FFF' : '#000'}
+								/>
+							</TouchableOpacity>
+						</View>
+
+						<Text className="text-sm font-black text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">
+							Tipo
+						</Text>
+						<View className="flex-row gap-3 mb-5">
+							{VEHICLE_TYPES.map((opt) => {
+								const isActive = type === opt.value;
+								return (
+									<TouchableOpacity
+										key={opt.value}
+										onPress={() => setType(opt.value)}
+										className={`flex-1 flex-row items-center justify-center py-3.5 rounded-2xl gap-1.5 ${isActive ? 'bg-primary' : isDark ? 'bg-[#262626]' : 'bg-gray-100'}`}
+									>
+										<Ionicons
+											name={opt.icon as any}
+											size={18}
+											color={
+												isActive
+													? '#231F20'
+													: themeColors.text
+											}
+										/>
+										<Text
+											className={`text-sm font-black ${isActive ? 'text-secondary' : 'text-gray-500 dark:text-gray-400'}`}
+										>
+											{opt.label}
+										</Text>
+									</TouchableOpacity>
+								);
+							})}
+						</View>
+
+						<View
+							className="px-4 py-3.5 rounded-2xl border mb-3"
+							style={{
+								backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
+								borderColor: isDark ? '#333' : '#E5E7EB',
+							}}
+						>
+							<TextInput
+								className="text-base font-bold"
+								style={{ color: themeColors.text }}
+								placeholder="Placa (ex: LD-45-12-AA)"
+								placeholderTextColor="#9CA3AF"
+								value={plateNumber}
+								onChangeText={setPlateNumber}
+								autoCapitalize="characters"
+							/>
+						</View>
+						<View className="flex-row gap-3 mb-3">
+							<View
+								className="flex-1 px-4 py-3.5 rounded-2xl border"
+								style={{
+									backgroundColor: isDark
+										? '#2A2A2A'
+										: '#F9FAFB',
+									borderColor: isDark ? '#333' : '#E5E7EB',
+								}}
+							>
+								<TextInput
+									className="text-base font-bold"
+									style={{ color: themeColors.text }}
+									placeholder="Marca"
+									placeholderTextColor="#9CA3AF"
+									value={brand}
+									onChangeText={setBrand}
+								/>
+							</View>
+							<View
+								className="flex-1 px-4 py-3.5 rounded-2xl border"
+								style={{
+									backgroundColor: isDark
+										? '#2A2A2A'
+										: '#F9FAFB',
+									borderColor: isDark ? '#333' : '#E5E7EB',
+								}}
+							>
+								<TextInput
+									className="text-base font-bold"
+									style={{ color: themeColors.text }}
+									placeholder="Modelo"
+									placeholderTextColor="#9CA3AF"
+									value={model}
+									onChangeText={setModel}
+								/>
+							</View>
+						</View>
+						<View
+							className="px-4 py-3.5 rounded-2xl border mb-5"
+							style={{
+								backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
+								borderColor: isDark ? '#333' : '#E5E7EB',
+							}}
+						>
+							<TextInput
+								className="text-base font-bold"
+								style={{ color: themeColors.text }}
+								placeholder="Cor"
+								placeholderTextColor="#9CA3AF"
+								value={color}
+								onChangeText={setColor}
+							/>
+						</View>
+
+						<TouchableOpacity
+							onPress={handleEditVehicle}
+							className="py-4 rounded-2xl items-center bg-primary active:opacity-70"
+							disabled={updateMutation.isPending}
+						>
+							{updateMutation.isPending ? (
+								<ActivityIndicator color="#000" />
+							) : (
+								<Text className="text-base font-black text-secondary">
+									Salvar
 								</Text>
 							)}
 						</TouchableOpacity>

@@ -52,7 +52,6 @@ export default function LoginScreen() {
 			navigation.replace('Main');
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			console.error('Erro ao fazer login:', err);
 			Alert.alert(
 				'Erro',
 				err.response?.data?.msg || 'Erro ao fazer login.',

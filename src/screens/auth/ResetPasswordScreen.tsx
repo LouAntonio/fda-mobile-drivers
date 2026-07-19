@@ -49,7 +49,6 @@ export default function ResetPasswordScreen() {
 			]);
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			console.error('Erro ao redefinir senha:', err);
 			Alert.alert(
 				'Erro',
 				err.response?.data?.msg || 'Erro ao redefinir senha.',

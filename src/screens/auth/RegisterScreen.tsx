@@ -53,7 +53,6 @@ export default function RegisterScreen() {
 			]);
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			console.error('Erro ao registrar:', err);
 			Alert.alert(
 				'Erro',
 				err.response?.data?.msg || 'Erro ao criar conta.',

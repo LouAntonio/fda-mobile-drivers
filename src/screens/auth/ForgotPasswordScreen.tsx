@@ -50,7 +50,6 @@ export default function ForgotPasswordScreen() {
 			);
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			console.error('Erro ao recuperar senha:', err);
 			Alert.alert(
 				'Erro',
 				err.response?.data?.msg ||

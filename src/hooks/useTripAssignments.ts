@@ -56,8 +56,8 @@ export function useTripOfferListener() {
 			},
 		);
 
-		const unsubError = socketManager.on('error', (data) => {
-			console.warn('[Socket error]', data.message);
+		const unsubError = socketManager.on('error', () => {
+			// socket error
 		});
 
 		return () => {

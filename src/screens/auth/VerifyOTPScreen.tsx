@@ -46,7 +46,6 @@ export default function VerifyTokenScreen() {
 			);
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
-			console.error('Erro ao reenviar:', err);
 			Alert.alert(
 				'Erro',
 				err.response?.data?.msg || 'Erro ao reenviar link.',
