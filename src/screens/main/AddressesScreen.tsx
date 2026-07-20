@@ -60,9 +60,12 @@ export default function AddressesScreen() {
 
 	const [showAddModal, setShowAddModal] = useState(false);
 	const [editingAddress, setEditingAddress] = useState<UserAddress | null>(null);
+	const [isRefreshing, setIsRefreshing] = useState(false);
 
 	const handleRefresh = useCallback(async () => {
+		setIsRefreshing(true);
 		await refetch();
+		setIsRefreshing(false);
 	}, [refetch]);
 	const [newLabel, setNewLabel] = useState('');
 	const [newAddress, setNewAddress] = useState('');
