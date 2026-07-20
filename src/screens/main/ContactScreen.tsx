@@ -45,20 +45,20 @@ const SUPPORT_CHANNELS = [
 
 const FAQ_ITEMS = [
 	{
-		question: 'Como solicitar uma corrida?',
-		answer: 'Insira o destino na barra de pesquisa na tela inicial, selecione o tipo de serviço e confirme.',
+		question: 'Como fico online para receber viagens?',
+		answer: 'No ecrã principal, ative o botão "Online" para começar a receber pedidos de viagem.',
 	},
 	{
-		question: 'Quais formas de pagamento são aceitas?',
-		answer: 'Multicaixa Express, dinheiro, cartão de crédito/débito e Flash Wallet.',
+		question: 'Como são calculados os meus ganhos?',
+		answer: 'Os ganhos são baseados na distância percorrida, tempo de viagem e tarifa aplicada. Podes ver o detalhe em "Ganhos".',
 	},
 	{
-		question: 'Como cancelo uma corrida?',
-		answer: 'Toque na corrida ativa e selecione "Cancelar". Cancelamentos após 2 minutos podem ter taxa.',
+		question: 'Quando recebo o pagamento?',
+		answer: 'Os pagamentos são processados semanalmente. Podes solicitar um levantamento a qualquer momento na secção de Ganhos.',
 	},
 	{
-		question: 'Como uso um cupão de desconto?',
-		answer: 'Vá em Promoções no menu lateral, copie o código e cole na tela de pagamento.',
+		question: 'Como atualizo os meus documentos?',
+		answer: 'Vai em "Documentos" no menu lateral para enviar ou atualizar os teus documentos de motorista.',
 	},
 ];
 

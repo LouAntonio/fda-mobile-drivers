@@ -56,6 +56,22 @@ export function useTripOfferListener() {
 			},
 		);
 
+		const unsubRejected = socketManager.on(
+			'trip:offer_rejected',
+			(data) => {
+				setCurrentOffer((prev) => {
+					if (prev && data.assignmentId === prev.assignmentId) {
+						Alert.alert(
+							'Oferta Rejeitada',
+							'A oferta para esta viagem foi rejeitada.',
+						);
+						return null;
+					}
+					return prev;
+				});
+			},
+		);
+
 		const unsubError = socketManager.on('error', () => {
 			// socket error
 		});
@@ -64,6 +80,7 @@ export function useTripOfferListener() {
 			unsubOffer();
 			unsubExpired();
 			unsubAccepted();
+			unsubRejected();
 			unsubError();
 			setCurrentOffer(null);
 		};

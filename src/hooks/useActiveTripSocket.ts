@@ -81,7 +81,7 @@ export function useActiveTripSocket({
 			cleanupFns.current = [];
 			setDriverLocation(null);
 		};
-	}, [tripId, enabled, accessToken, connect, queryClient]);
+	}, [tripId, enabled, accessToken, connect, disconnect, queryClient]);
 
 	return { connect, disconnect, driverLocation };
 }

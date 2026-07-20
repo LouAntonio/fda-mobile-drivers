@@ -413,6 +413,38 @@ export default function DriverActiveTripScreen() {
 					</View>
 				)}
 
+				{/* Delivery Info */}
+				{trip?.serviceType === 'DELIVERY' && trip.deliveryDetails && (
+					<View
+						className="py-3 border-t mb-3"
+						style={{ borderColor: isDark ? '#333' : '#F3F4F6' }}
+					>
+						<Text className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+							Dados da Entrega
+						</Text>
+						<View className="gap-1.5">
+							<View className="flex-row items-center">
+								<Ionicons name="person-outline" size={14} color={isDark ? '#999' : '#666'} />
+								<Text className="ml-2 text-sm text-secondary dark:text-off-white">
+									{trip.deliveryDetails.receiverName}
+								</Text>
+							</View>
+							<View className="flex-row items-center">
+								<Ionicons name="call-outline" size={14} color={isDark ? '#999' : '#666'} />
+								<Text className="ml-2 text-sm text-secondary dark:text-off-white">
+									{trip.deliveryDetails.receiverPhone}
+								</Text>
+							</View>
+							<View className="flex-row items-center">
+								<Ionicons name="cube-outline" size={14} color={isDark ? '#999' : '#666'} />
+								<Text className="ml-2 text-sm text-secondary dark:text-off-white capitalize">
+									{trip.deliveryDetails.packageType?.toLowerCase()}
+								</Text>
+							</View>
+						</View>
+					</View>
+				)}
+
 				{/* Delivery Status */}
 				{trip?.serviceType === 'DELIVERY' && deliveryConfig && !isTerminal && (
 					<View

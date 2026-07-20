@@ -17,8 +17,8 @@ export default function SplashScreen({
 		useNavigation<
 			NativeStackNavigationProp<RootStackParamList, 'Splash'>
 		>();
-	const fadeAnim = useMemo(() => new Animated.Value(0), []);
-	const scaleAnim = useMemo(() => new Animated.Value(0.8), []);
+	const fadeAnim = useRef(new Animated.Value(0)).current;
+	const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
 	const { themeColors } = useThemeColors();
 	useEffect(() => {

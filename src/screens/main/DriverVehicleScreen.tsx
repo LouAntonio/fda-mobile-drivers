@@ -49,6 +49,7 @@ export default function DriverVehicleScreen() {
 	const [plateNumber, setPlateNumber] = useState('');
 	const [brand, setBrand] = useState('');
 	const [model, setModel] = useState('');
+	const [year, setYear] = useState('');
 	const [color, setColor] = useState('');
 	const [type, setType] = useState<VehicleType>('MOTO');
 
@@ -96,9 +97,15 @@ export default function DriverVehicleScreen() {
 			!plateNumber.trim() ||
 			!brand.trim() ||
 			!model.trim() ||
+			!year.trim() ||
 			!color.trim()
 		) {
 			Alert.alert('Atenção', 'Preencha todos os campos');
+			return;
+		}
+		const yearNum = parseInt(year, 10);
+		if (yearNum < 1990 || yearNum > new Date().getFullYear() + 1) {
+			Alert.alert('Erro', 'Ano inválido. Insira um ano entre 1990 e ' + (new Date().getFullYear() + 1));
 			return;
 		}
 		createMutation.mutate(
@@ -106,6 +113,7 @@ export default function DriverVehicleScreen() {
 				plateNumber,
 				brand,
 				model,
+				year: yearNum,
 				color,
 				type,
 				photoUrl: photoUrl || undefined,
@@ -117,6 +125,7 @@ export default function DriverVehicleScreen() {
 					setBrand('');
 					setModel('');
 					setColor('');
+					setYear('');
 					setPhotoUrl('');
 				},
 			},
@@ -129,9 +138,15 @@ export default function DriverVehicleScreen() {
 			!plateNumber.trim() ||
 			!brand.trim() ||
 			!model.trim() ||
+			!year.trim() ||
 			!color.trim()
 		) {
 			Alert.alert('Atenção', 'Preencha todos os campos');
+			return;
+		}
+		const yearNum = parseInt(year, 10);
+		if (yearNum < 1990 || yearNum > new Date().getFullYear() + 1) {
+			Alert.alert('Erro', 'Ano inválido. Insira um ano entre 1990 e ' + (new Date().getFullYear() + 1));
 			return;
 		}
 		updateMutation.mutate(
@@ -141,6 +156,7 @@ export default function DriverVehicleScreen() {
 					plateNumber,
 					brand,
 					model,
+					year: yearNum,
 					color,
 					type,
 					photoUrl: photoUrl || undefined,
@@ -160,6 +176,7 @@ export default function DriverVehicleScreen() {
 		setPlateNumber(vehicle.plateNumber);
 		setBrand(vehicle.brand);
 		setModel(vehicle.model);
+		setYear(vehicle.year?.toString() ?? '');
 		setColor(vehicle.color);
 		setType(vehicle.type);
 		setPhotoUrl(vehicle.photoUrl ?? '');
@@ -544,6 +561,24 @@ export default function DriverVehicleScreen() {
 							<TextInput
 								className="text-base font-bold"
 								style={{ color: themeColors.text }}
+								placeholder="Ano (ex: 2020)"
+								placeholderTextColor="#9CA3AF"
+								value={year}
+								onChangeText={setYear}
+								keyboardType="number-pad"
+								maxLength={4}
+							/>
+						</View>
+						<View
+							className="px-4 py-3.5 rounded-2xl border mb-5"
+							style={{
+								backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
+								borderColor: isDark ? '#333' : '#E5E7EB',
+							}}
+						>
+							<TextInput
+								className="text-base font-bold"
+								style={{ color: themeColors.text }}
 								placeholder="Cor"
 								placeholderTextColor="#9CA3AF"
 								value={color}
@@ -739,6 +774,24 @@ export default function DriverVehicleScreen() {
 									onChangeText={setModel}
 								/>
 							</View>
+						</View>
+						<View
+							className="px-4 py-3.5 rounded-2xl border mb-5"
+							style={{
+								backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB',
+								borderColor: isDark ? '#333' : '#E5E7EB',
+							}}
+						>
+							<TextInput
+								className="text-base font-bold"
+								style={{ color: themeColors.text }}
+								placeholder="Ano (ex: 2020)"
+								placeholderTextColor="#9CA3AF"
+								value={year}
+								onChangeText={setYear}
+								keyboardType="number-pad"
+								maxLength={4}
+							/>
 						</View>
 						<View
 							className="px-4 py-3.5 rounded-2xl border mb-5"

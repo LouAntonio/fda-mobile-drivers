@@ -288,6 +288,11 @@ export default function TripDetailScreen() {
 						label="Taxa de serviço"
 						value={`${Number(trip.serviceFee).toLocaleString('pt-AO')} Kz`}
 					/>
+					<PriceRow
+						label="Ganho do motorista"
+						value={`${Number(trip.driverEarnings).toLocaleString('pt-AO')} Kz`}
+						color="#10B981"
+					/>
 					{trip.surgeMultiplierApplied > 1 && (
 						<PriceRow
 							label="Tarifa dinâmica"

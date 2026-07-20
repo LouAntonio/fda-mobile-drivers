@@ -150,6 +150,11 @@ export default function DriverDocumentsScreen() {
 			Alert.alert('Atenção', 'Selecione ou insira o URL do documento');
 			return;
 		}
+		const urlPattern = /^https?:\/\/.+/i;
+		if (!urlPattern.test(fileUrl.trim())) {
+			Alert.alert('Erro', 'Insere um URL válido (https://...)');
+			return;
+		}
 		uploadMutation.mutate(
 			{
 				type: selectedType,
