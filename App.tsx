@@ -11,6 +11,7 @@ import { useThemeStore } from './src/store/themeStore';
 import { useThemeColors } from './src/hooks/useThemeColors';
 import { registerPushTokenOnServer } from './src/services/notifications';
 import RootNavigator from './src/navigation/RootNavigator';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 export default function App() {
 	const { theme } = useThemeStore();
@@ -39,9 +40,11 @@ export default function App() {
 						Platform.OS === 'android' ? 'transparent' : undefined
 					}
 				/>
-				<NavigationContainer ref={navigationRef}>
-					<RootNavigator />
-				</NavigationContainer>
+				<ErrorBoundary>
+					<NavigationContainer ref={navigationRef}>
+						<RootNavigator />
+					</NavigationContainer>
+				</ErrorBoundary>
 			</SafeAreaProvider>
 		</QueryClientProvider>
 	);
