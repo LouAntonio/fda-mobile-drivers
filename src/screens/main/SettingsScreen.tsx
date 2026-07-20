@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -34,6 +34,13 @@ export default function SettingsScreen() {
 	const cardBgStyle = {
 		backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
 	};
+
+	const fetchNotificationPrefs = useNotificationStore(
+		(s) => s.fetchFromServer,
+	);
+	useEffect(() => {
+		fetchNotificationPrefs();
+	}, [fetchNotificationPrefs]);
 
 	const themeOptions = [
 		{

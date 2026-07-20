@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
-import { useTrip, useUpdateTripStatus, useUpdateDeliveryStatus } from '../../hooks/useTrips';
+import { useTrip, useUpdateTripStatus, useUpdateDeliveryStatus, useRegisterCashCollection } from '../../hooks/useTrips';
 import { useActiveTripSocket } from '../../hooks/useActiveTripSocket';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { useDriverLocation } from '../../hooks/useDriverLocation';
@@ -68,6 +68,7 @@ export default function DriverActiveTripScreen() {
 	const { data: trip, isLoading } = useTrip(tripId);
 	const statusMutation = useUpdateTripStatus();
 	const deliveryMutation = useUpdateDeliveryStatus();
+	const cashCollectionMutation = useRegisterCashCollection();
 	useActiveTripSocket({ tripId, enabled: true });
 	const { location: currentLocation } = useCurrentLocation();
 	const { route: mapRoute, fetchRoute } = useMapRoute();
@@ -525,18 +526,48 @@ export default function DriverActiveTripScreen() {
 					</TouchableOpacity>
 				)}
 
-				{isTerminal && (
+			{trip?.status === 'COMPLETED' &&
+				trip?.paymentMethod === 'CASH' &&
+				trip?.paymentStatus !== 'PAID' && (
 					<TouchableOpacity
 						onPress={() =>
-							navigation.replace('TripDetail', { tripId })
+							cashCollectionMutation.mutate({
+								tripId: trip.id,
+								driverId: trip.driver?.id ?? '',
+							})
 						}
-						className="py-4 rounded-2xl items-center bg-primary active:opacity-70"
+						className="py-4 rounded-2xl items-center bg-green-500 active:opacity-70 mb-3"
+						disabled={cashCollectionMutation.isPending}
 					>
-						<Text className="text-base font-black text-secondary">
-							Ver Detalhes
-						</Text>
+						{cashCollectionMutation.isPending ? (
+							<ActivityIndicator color="#FFF" />
+						) : (
+							<View className="flex-row items-center gap-2">
+								<Ionicons
+									name="cash-outline"
+									size={20}
+									color="#FFF"
+								/>
+								<Text className="text-base font-black text-white">
+									Registar Recolha de Cash
+								</Text>
+							</View>
+						)}
 					</TouchableOpacity>
 				)}
+
+			{isTerminal && (
+				<TouchableOpacity
+					onPress={() =>
+						navigation.replace('TripDetail', { tripId })
+					}
+					className="py-4 rounded-2xl items-center bg-primary active:opacity-70"
+				>
+					<Text className="text-base font-black text-secondary">
+						Ver Detalhes
+					</Text>
+				</TouchableOpacity>
+			)}
 			</Animated.View>
 		</SafeAreaView>
 	);

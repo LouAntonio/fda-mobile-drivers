@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -22,7 +22,13 @@ import { useMutation } from '@tanstack/react-query';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useDriverProfile } from '../../hooks/useDriverProfile';
 import { usePayouts } from '../../hooks/useEarnings';
-import { requestPayout } from '../../api/earnings';
+import {
+	requestPayout,
+	fetchBankAccounts,
+	createBankAccount,
+	deleteBankAccount,
+} from '../../api/earnings';
+import type { DriverBankAccount } from '../../types/api';
 
 export default function DriverEarningsScreen() {
 	const navigation = useNavigation();
@@ -71,6 +77,69 @@ export default function DriverEarningsScreen() {
 			Alert.alert('Erro', msg);
 		},
 	});
+
+	const [bankAccounts, setBankAccounts] = useState<DriverBankAccount[]>([]);
+	const [showBankModal, setShowBankModal] = useState(false);
+	const [bankName, setBankName] = useState('');
+	const [iban, setIban] = useState('');
+	const [accountHolder, setAccountHolder] = useState('');
+
+	useEffect(() => {
+		fetchBankAccounts().then(setBankAccounts).catch(() => {});
+	}, []);
+
+	const handleAddBankAccount = async () => {
+		if (!bankName.trim() || !iban.trim() || !accountHolder.trim()) {
+			Alert.alert('Atenção', 'Preenche todos os campos.');
+			return;
+		}
+		try {
+			const result = await createBankAccount({
+				bankName: bankName.trim(),
+				iban: iban.trim(),
+				accountHolder: accountHolder.trim(),
+			});
+			setBankAccounts((prev) => [...prev, result]);
+			setShowBankModal(false);
+			setBankName('');
+			setIban('');
+			setAccountHolder('');
+			Alert.alert('Sucesso', 'Conta bancária adicionada com sucesso.');
+		} catch (err: any) {
+			const msg =
+				err?.response?.data?.msg ||
+				err?.response?.data?.message ||
+				'Erro ao adicionar conta.';
+			Alert.alert('Erro', msg);
+		}
+	};
+
+	const handleDeleteBankAccount = (accountId: string) => {
+		Alert.alert(
+			'Remover conta',
+			'Tens a certeza que desejas remover esta conta bancária?',
+			[
+				{ text: 'Cancelar', style: 'cancel' },
+				{
+					text: 'Remover',
+					style: 'destructive',
+					onPress: async () => {
+						try {
+							await deleteBankAccount(accountId);
+							setBankAccounts((prev) =>
+								prev.filter((a) => a.id !== accountId),
+							);
+						} catch {
+							Alert.alert(
+								'Erro',
+								'Erro ao remover conta bancária.',
+							);
+						}
+					},
+				},
+			],
+		);
+	};
 
 	const handleOpenModal = () => {
 		setPayoutAmount('');
@@ -319,6 +388,91 @@ export default function DriverEarningsScreen() {
 					)}
 				</Animated.View>
 
+				<Animated.View
+					entering={FadeInDown.duration(400).delay(500)}
+					className="p-4 rounded-2xl mb-4 border"
+					style={{
+						backgroundColor: isDark ? '#1A1A1A' : '#F9FAFB',
+						borderColor: isDark ? '#333' : '#E5E7EB',
+					}}
+				>
+					<View className="flex-row items-center justify-between mb-3">
+						<Text className="text-xs font-bold uppercase tracking-wider text-gray-500">
+							Conta Bancária
+						</Text>
+						<TouchableOpacity
+							onPress={() => {
+								setBankName('');
+								setIban('');
+								setAccountHolder('');
+								setShowBankModal(true);
+							}}
+							activeOpacity={0.7}
+						>
+							<View className="flex-row items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/20">
+								<Ionicons
+									name="add"
+									size={14}
+									color={themeColors.primary}
+								/>
+								<Text className="text-xs font-black text-primary">
+									{bankAccounts.length === 0
+										? 'Adicionar'
+										: 'Nova'}
+								</Text>
+							</View>
+						</TouchableOpacity>
+					</View>
+					{bankAccounts.length === 0 ? (
+						<Text className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+							Nenhuma conta bancária associada. Adiciona uma para
+							receber pagamentos por transferência.
+						</Text>
+					) : (
+						bankAccounts.map((account) => (
+							<View
+								key={account.id}
+								className="flex-row items-center justify-between py-3 border-b"
+								style={{
+									borderColor: isDark ? '#333' : '#E5E7EB',
+								}}
+							>
+								<View className="flex-1">
+									<View className="flex-row items-center gap-2">
+										<Text className="text-sm font-bold text-secondary dark:text-off-white">
+											{account.bankName}
+										</Text>
+										{account.isDefault && (
+											<View className="px-2 py-0.5 rounded bg-primary/20">
+												<Text className="text-[9px] font-black text-primary uppercase">
+													Padrão
+												</Text>
+											</View>
+										)}
+									</View>
+									<Text className="text-xs text-gray-500 mt-0.5">
+										{account.accountHolder} •{' '}
+										{account.iban}
+									</Text>
+								</View>
+								<TouchableOpacity
+									onPress={() =>
+										handleDeleteBankAccount(account.id)
+									}
+									hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+									activeOpacity={0.7}
+								>
+									<Ionicons
+										name="trash-outline"
+										size={18}
+										color="#EF4444"
+									/>
+								</TouchableOpacity>
+							</View>
+						))
+					)}
+				</Animated.View>
+
 				<View className="h-10" />
 			</ScrollView>
 
@@ -428,6 +582,162 @@ export default function DriverEarningsScreen() {
 											{payoutMutation.isPending
 												? 'A processar...'
 												: 'Confirmar Saque'}
+										</Text>
+									</TouchableOpacity>
+								</View>
+							</View>
+						</Animated.View>
+					</TouchableWithoutFeedback>
+				</KeyboardAvoidingView>
+			</Modal>
+
+			{/* Bank Account Modal */}
+			<Modal
+				visible={showBankModal}
+				animationType="fade"
+				transparent
+				onRequestClose={() => setShowBankModal(false)}
+			>
+				<KeyboardAvoidingView
+					behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+					className="flex-1 justify-center"
+				>
+					<Pressable
+						className="absolute inset-0 bg-black/60"
+						onPress={() => setShowBankModal(false)}
+					/>
+					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+						<Animated.View
+							entering={FadeInDown.duration(300).springify()}
+						>
+							<View
+								className="mx-6 rounded-[32px] p-6"
+								style={{
+									backgroundColor: isDark
+										? '#1C1C1E'
+										: '#FFFFFF',
+								}}
+							>
+								<Text
+									className="text-xl font-black mb-5"
+									style={{ color: themeColors.text }}
+								>
+									Adicionar Conta Bancária
+								</Text>
+
+								<View
+									className="flex-row items-center rounded-2xl px-4 mb-3 border"
+									style={{
+										backgroundColor: isDark
+											? '#2C2C2E'
+											: '#F5F5F5',
+										borderColor: isDark
+											? '#444'
+											: '#E5E7EB',
+									}}
+								>
+									<Ionicons
+										name="business-outline"
+										size={18}
+										color={themeColors.primary}
+									/>
+									<TextInput
+										className="flex-1 py-4 ml-2 text-sm font-bold"
+										placeholder="Nome do banco"
+										placeholderTextColor="#9CA3AF"
+										value={bankName}
+										onChangeText={setBankName}
+										style={{ color: themeColors.text }}
+									/>
+								</View>
+
+								<View
+									className="flex-row items-center rounded-2xl px-4 mb-3 border"
+									style={{
+										backgroundColor: isDark
+											? '#2C2C2E'
+											: '#F5F5F5',
+										borderColor: isDark
+											? '#444'
+											: '#E5E7EB',
+									}}
+								>
+									<Ionicons
+										name="card-outline"
+										size={18}
+										color={themeColors.primary}
+									/>
+									<TextInput
+										className="flex-1 py-4 ml-2 text-sm font-bold"
+										placeholder="IBAN ou número de conta"
+										placeholderTextColor="#9CA3AF"
+										autoCapitalize="characters"
+										value={iban}
+										onChangeText={setIban}
+										style={{ color: themeColors.text }}
+									/>
+								</View>
+
+								<View
+									className="flex-row items-center rounded-2xl px-4 mb-6 border"
+									style={{
+										backgroundColor: isDark
+											? '#2C2C2E'
+											: '#F5F5F5',
+										borderColor: isDark
+											? '#444'
+											: '#E5E7EB',
+									}}
+								>
+									<Ionicons
+										name="person-outline"
+										size={18}
+										color={themeColors.primary}
+									/>
+									<TextInput
+										className="flex-1 py-4 ml-2 text-sm font-bold"
+										placeholder="Titular da conta"
+										placeholderTextColor="#9CA3AF"
+										value={accountHolder}
+										onChangeText={setAccountHolder}
+										style={{ color: themeColors.text }}
+									/>
+								</View>
+
+								<View className="flex-row gap-3">
+									<TouchableOpacity
+										className="flex-1 py-3.5 rounded-2xl"
+										style={{
+											backgroundColor: isDark
+												? '#2C2C2E'
+												: '#F5F5F5',
+										}}
+										onPress={() => {
+											setShowBankModal(false);
+											setBankName('');
+											setIban('');
+											setAccountHolder('');
+										}}
+										activeOpacity={0.7}
+									>
+										<Text
+											className="text-center font-bold"
+											style={{ color: themeColors.text }}
+										>
+											Cancelar
+										</Text>
+									</TouchableOpacity>
+									<TouchableOpacity
+										className="flex-1 py-3.5 rounded-2xl"
+										style={{
+											backgroundColor:
+												themeColors.primary,
+										}}
+										onPress={handleAddBankAccount}
+										activeOpacity={0.7}
+									>
+										<Text className="text-center font-bold text-secondary">
+											Adicionar
 										</Text>
 									</TouchableOpacity>
 								</View>

@@ -235,6 +235,15 @@ export async function updateDeliveryStatus(
 	return data as TripFromApi;
 }
 
+export async function registerCashCollection(params: {
+	tripId: string;
+	driverId: string;
+	amount?: number;
+	notes?: string;
+}): Promise<void> {
+	await api.post('/financial-transactions/cash-collection', params);
+}
+
 export async function openDispute(payload: DisputePayload): Promise<void> {
 	await api.post('/disputes', payload);
 }

@@ -386,6 +386,19 @@ export default function ProfileScreen() {
 									</Text>
 								)}
 							</TouchableOpacity>
+
+							{driverProfile?.fleet && (
+								<View className="flex-row items-center gap-1.5 mt-2 px-3 py-1.5 rounded-full bg-primary/10">
+									<Ionicons
+										name="people"
+										size={14}
+										color={themeColors.primary}
+									/>
+									<Text className="text-xs font-black text-primary">
+										{driverProfile.fleet.name}
+									</Text>
+								</View>
+							)}
 						</Animated.View>
 
 						{/* Stats Row */}

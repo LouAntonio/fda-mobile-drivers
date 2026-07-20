@@ -16,6 +16,7 @@ import {
 	openDispute,
 	updateTripStatus,
 	updateDeliveryStatus,
+	registerCashCollection,
 	type ListTripsFilters,
 	type EstimateTripPayload,
 	type CreateTripPayload,
@@ -175,6 +176,31 @@ export function useOpenDispute() {
 			Alert.alert(
 				'Erro',
 				err.response?.data?.msg || 'Erro ao abrir disputa',
+			);
+		},
+	});
+}
+
+export function useRegisterCashCollection() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (params: {
+			tripId: string;
+			driverId: string;
+			amount?: number;
+			notes?: string;
+		}) => registerCashCollection(params),
+		onSuccess: (_data, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: tripKeys.detail(variables.tripId),
+			});
+			Alert.alert('Sucesso', 'Recolha de cash registada!');
+		},
+		onError: (err: AxiosError<{ msg?: string }>) => {
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg || 'Erro ao registar recolha de cash',
 			);
 		},
 	});

@@ -113,6 +113,10 @@ export interface DriverProfile {
 	lastLocationAt: string | null;
 	activeVehicleId: string | null;
 	fleetId: string | null;
+	fleet?: {
+		id: string;
+		name: string;
+	} | null;
 	createdAt: string;
 	updatedAt: string;
 	user: {
@@ -159,6 +163,17 @@ export interface DriverStats {
 	cancelledTripsCount: number;
 	availableBalance: number;
 	pendingBalance: number;
+}
+
+export interface DriverBankAccount {
+	id: string;
+	driverId: string;
+	bankName: string;
+	iban: string;
+	accountHolder: string;
+	isDefault: boolean;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface DriverPayout {
