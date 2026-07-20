@@ -4,7 +4,7 @@ export type AuthStackParamList = {
 	Login: undefined;
 	Register: undefined;
 	ForgotPassword: undefined;
-	VerifyToken: { email: string };
+	VerifyToken: { phoneNumber: string };
 	ResetPassword: { token: string };
 };
 

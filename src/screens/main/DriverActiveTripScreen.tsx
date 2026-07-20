@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
-import { useTrip, useUpdateTripStatus, useUpdateDeliveryStatus, useRegisterCashCollection } from '../../hooks/useTrips';
+import { useTrip, useUpdateTripStatus, useUpdateDeliveryStatus, useRegisterCashCollection, useCancelTrip } from '../../hooks/useTrips';
 import { useActiveTripSocket } from '../../hooks/useActiveTripSocket';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { useDriverLocation } from '../../hooks/useDriverLocation';
@@ -67,6 +67,7 @@ export default function DriverActiveTripScreen() {
 
 	const { data: trip, isLoading } = useTrip(tripId);
 	const statusMutation = useUpdateTripStatus();
+	const cancelMutation = useCancelTrip();
 	const deliveryMutation = useUpdateDeliveryStatus();
 	const cashCollectionMutation = useRegisterCashCollection();
 	useActiveTripSocket({ tripId, enabled: true });
@@ -104,7 +105,7 @@ export default function DriverActiveTripScreen() {
 						currentLocation?.longitude ?? pickupCoords.lng,
 						currentLocation?.latitude ?? pickupCoords.lat,
 					],
-					[pickupCoords.lng, pickupCoords.lat],
+					[dropoffCoords.lng, dropoffCoords.lat],
 				);
 			} else {
 				fetchRoute(
@@ -212,12 +213,8 @@ export default function DriverActiveTripScreen() {
 				text: 'Sim, Cancelar',
 				style: 'destructive',
 				onPress: () => {
-					statusMutation.mutate(
-						{
-							tripId,
-							status: 'CANCELLED' as const,
-							cancelReason: 'Motorista cancelou',
-						},
+					cancelMutation.mutate(
+						{ id: tripId, reason: 'Motorista cancelou' },
 						{
 							onSuccess: () =>
 								navigation.replace('TripDetail', { tripId }),

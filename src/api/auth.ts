@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import type { ApiResponse, AuthTokens } from '../types/api';
+import type { AuthTokens } from '../types/api';
 
 type RegisterParams = {
 	name: string;
@@ -9,35 +9,35 @@ type RegisterParams = {
 };
 
 export function registerUser(data: RegisterParams) {
-	return api.post<ApiResponse<never>>('/auth/register', data);
+	return api.post('/auth/register', data);
 }
 
 type LoginParams = { phoneNumber: string; password: string };
 
 export function loginUser(data: LoginParams) {
-	return api.post<ApiResponse<AuthTokens>>('/auth/login', data);
+	return api.post<AuthTokens>('/auth/login', data);
 }
 
-type ForgotPasswordParams = { email: string };
+type ForgotPasswordParams = { phoneNumber: string };
 
 export function forgotPassword(data: ForgotPasswordParams) {
-	return api.post<ApiResponse<never>>('/auth/forgot-password', data);
+	return api.post('/auth/forgot-password', data);
 }
 
 type ResetPasswordParams = { token: string; password: string };
 
 export function resetPassword(data: ResetPasswordParams) {
-	return api.post<ApiResponse<never>>('/auth/reset-password', data);
+	return api.post('/auth/reset-password', data);
 }
 
 export function refreshTokens(refreshToken: string) {
-	return api.post<ApiResponse<AuthTokens>>('/auth/refresh', { refreshToken });
+	return api.post<AuthTokens>('/auth/refresh', { refreshToken });
 }
 
 export function logoutUser(refreshToken: string) {
-	return api.post<ApiResponse<never>>('/auth/logout', { refreshToken });
+	return api.post('/auth/logout', { refreshToken });
 }
 
 export function loginWithGoogle(accessToken: string) {
-	return api.post<ApiResponse<AuthTokens>>('/auth/google', { accessToken });
+	return api.post<AuthTokens>('/auth/google', { accessToken });
 }

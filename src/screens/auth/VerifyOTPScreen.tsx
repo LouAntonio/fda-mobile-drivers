@@ -20,6 +20,7 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { forgotPassword } from '../../services/auth';
+import { api } from '../../lib/api';
 import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 
 type VerifyTokenNavigationProp = NativeStackNavigationProp<
@@ -31,7 +32,7 @@ type VerifyTokenRouteProp = RouteProp<AuthStackParamList, 'VerifyToken'>;
 export default function VerifyTokenScreen() {
 	const navigation = useNavigation<VerifyTokenNavigationProp>();
 	const route = useRoute<VerifyTokenRouteProp>();
-	const { email } = route.params;
+	const { phoneNumber } = route.params;
 	const { themeColors } = useThemeColors();
 
 	const [token, setToken] = useState('');
@@ -42,7 +43,7 @@ export default function VerifyTokenScreen() {
 		onSuccess: () => {
 			Alert.alert(
 				'Sucesso',
-				'Um novo link de recuperação foi enviado para o seu email.',
+				'Um novo código de recuperação foi enviado para o seu telefone.',
 			);
 		},
 		onError: (err: AxiosError<{ msg?: string }>) => {
@@ -53,12 +54,27 @@ export default function VerifyTokenScreen() {
 		},
 	});
 
+	const verifyMutation = useMutation({
+		mutationFn: (tkn: string) =>
+			api.post('/auth/verify-reset-token', { token: tkn }),
+		onSuccess: () => {
+			navigation.navigate('ResetPassword', { token: token.trim() });
+		},
+		onError: (err: AxiosError<{ msg?: string }>) => {
+			Alert.alert(
+				'Erro',
+				err.response?.data?.msg ||
+					'Token inválido ou expirado. Solicite um novo link.',
+			);
+		},
+	});
+
 	const handleVerify = () => {
 		if (!token.trim()) {
 			Alert.alert('Erro', 'Por favor, insira o token de recuperação.');
 			return;
 		}
-		navigation.navigate('ResetPassword', { token: token.trim() });
+		verifyMutation.mutate(token.trim());
 	};
 
 	return (
@@ -101,8 +117,8 @@ export default function VerifyTokenScreen() {
 								{ color: themeColors.secondary },
 							]}
 						>
-							Enviamos um link de recuperação para {email}. Insira
-							abaixo o token recebido para continuar.
+							Enviamos um código de recuperação para {phoneNumber}.
+							Insira abaixo o token recebido para continuar.
 						</Text>
 					</Animated.View>
 
@@ -123,7 +139,7 @@ export default function VerifyTokenScreen() {
 						/>
 
 						<TouchableOpacity
-							onPress={() => resendMutation.mutate({ email })}
+							onPress={() => resendMutation.mutate({ phoneNumber })}
 							className="items-center py-2"
 							activeOpacity={0.6}
 						>

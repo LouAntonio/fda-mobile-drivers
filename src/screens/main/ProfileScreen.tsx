@@ -20,7 +20,7 @@ import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeColors } from '../../hooks/useThemeColors';
@@ -31,7 +31,6 @@ import {
 	sendPhoneVerification,
 	confirmPhoneVerification,
 } from '../../services/phone';
-import { fetchProfile } from '../../api/profile';
 import { uploadToCloudinary } from '../../lib/upload';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -39,6 +38,7 @@ import Button from '../../components/Button';
 export default function ProfileScreen() {
 	const navigation = useNavigation<any>();
 	const { themeColors, isDark } = useThemeColors();
+	const user = useAuthStore((state) => state.user);
 	const logout = useAuthStore((state) => state.logout);
 	const refreshToken = useAuthStore((state) => state.refreshToken);
 	const setUser = useAuthStore((state) => state.setUser);
@@ -78,7 +78,6 @@ export default function ProfileScreen() {
 			setShowPhoneVerificationModal(false);
 			setPhoneOtpSent(false);
 			setPhoneOtpCode('');
-			profileQuery.refetch();
 			refetchDriver();
 			setUser({ ...user!, phoneNumberVerified: true });
 			Alert.alert('Sucesso', 'Telefone verificado com sucesso!');
@@ -103,7 +102,6 @@ export default function ProfileScreen() {
 			}),
 		onSuccess: () => {
 			setShowEmergencyModal(false);
-			profileQuery.refetch();
 			refetchDriver();
 			Alert.alert('Sucesso', 'Contacto de emergência atualizado!');
 		},
@@ -116,15 +114,11 @@ export default function ProfileScreen() {
 		},
 	});
 
-	const profileQuery = useQuery({
-		queryKey: ['profile'],
-		queryFn: fetchProfile,
-	});
-
 	const {
 		data: driverProfile,
 		isLoading: driverLoading,
 		refetch: refetchDriver,
+		error: driverError,
 	} = useDriverProfile();
 
 	const updateMutation = useMutation({
@@ -139,7 +133,6 @@ export default function ProfileScreen() {
 			if (data?.data) {
 				setUser(data.data as any);
 			}
-			profileQuery.refetch();
 			refetchDriver();
 			setShowEditModal(false);
 			Alert.alert('Sucesso', 'Perfil atualizado!');
@@ -175,12 +168,10 @@ export default function ProfileScreen() {
 	};
 
 	const onRefresh = useCallback(() => {
-		profileQuery.refetch();
 		refetchDriver();
-	}, [profileQuery, refetchDriver]);
+	}, [refetchDriver]);
 
 	const handleEditPress = () => {
-		const user = profileQuery.data?.user;
 		setEditName(user?.name || '');
 		setEditSurname(user?.surname || '');
 		setShowEditModal(true);
@@ -218,9 +209,8 @@ export default function ProfileScreen() {
 		}
 	};
 
-	const isLoading = profileQuery.isLoading || driverLoading;
-	const error = profileQuery.error;
-	const user = profileQuery.data?.user;
+	const isLoading = driverLoading;
+	const error = driverError;
 
 	const ratingRounded = driverProfile
 		? Math.round(driverProfile.ratingAverage * 10) / 10

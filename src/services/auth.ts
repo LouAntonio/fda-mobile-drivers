@@ -34,7 +34,7 @@ export function loginUser(data: LoginParams) {
 }
 
 type ForgotPasswordParams = {
-	email: string;
+	phoneNumber: string;
 };
 
 export function forgotPassword(data: ForgotPasswordParams) {

@@ -31,7 +31,7 @@ export default function ForgotPasswordScreen() {
 	const navigation = useNavigation<ForgotPasswordNavigationProp>();
 	const { themeColors } = useThemeColors();
 
-	const [email, setEmail] = useState('');
+	const [phoneNumber, setPhoneNumber] = useState('');
 	const keyboardHeight = useKeyboardHeight();
 
 	const mutation = useMutation({
@@ -39,12 +39,14 @@ export default function ForgotPasswordScreen() {
 		onSuccess: () => {
 			Alert.alert(
 				'Sucesso',
-				'Se o email existir, você receberá um link de recuperação.',
+				'Se o número existir, você receberá um código de recuperação.',
 				[
 					{
 						text: 'OK',
 						onPress: () =>
-							navigation.navigate('VerifyToken', { email }),
+							navigation.navigate('VerifyToken', {
+								phoneNumber,
+							}),
 					},
 				],
 			);
@@ -53,17 +55,17 @@ export default function ForgotPasswordScreen() {
 			Alert.alert(
 				'Erro',
 				err.response?.data?.msg ||
-					'Erro ao enviar email de recuperação.',
+					'Erro ao enviar código de recuperação.',
 			);
 		},
 	});
 
 	const handleSend = () => {
-		if (!email) {
-			Alert.alert('Erro', 'Por favor, insira o seu email.');
+		if (!phoneNumber) {
+			Alert.alert('Erro', 'Por favor, insira o seu número de telefone.');
 			return;
 		}
-		mutation.mutate({ email });
+		mutation.mutate({ phoneNumber });
 	};
 
 	return (
@@ -106,24 +108,24 @@ export default function ForgotPasswordScreen() {
 								{ color: themeColors.secondary },
 							]}
 						>
-							Informe o seu email para receber um link de
-							recuperação de senha.
+							Informe o seu número de telefone para
+							receber um código de recuperação.
 						</Text>
 					</Animated.View>
 
 					<Animated.View entering={FadeInUp.duration(800).delay(400)}>
 						<Input
-							label="Email"
-							placeholder="seu@email.com"
-							value={email}
-							onChangeText={setEmail}
-							keyboardType="email-address"
+							label="Número de Telefone"
+							placeholder="+244 900 000 000"
+							value={phoneNumber}
+							onChangeText={setPhoneNumber}
+							keyboardType="phone-pad"
 							autoCapitalize="none"
-							leftIcon="mail-outline"
+							leftIcon="phone-portrait-outline"
 						/>
 
 						<Button
-							title="Enviar Link de Recuperação"
+							title="Enviar Código de Recuperação"
 							onPress={handleSend}
 							loading={mutation.isPending}
 							className="mt-4 mb-8"
