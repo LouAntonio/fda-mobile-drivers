@@ -23,7 +23,7 @@ import { AddressListSkeleton } from '../../components/skeletons/AddressSkeleton'
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import MapView from '../../components/MapView';
-import type { AddressLabel } from '../../types/api';
+import type { AddressLabel, UserAddress } from '../../types/api';
 
 const LABEL_OPTIONS: { label: string; value: AddressLabel; icon: string }[] = [
 	{ label: 'Casa', value: 'HOME', icon: 'home' },
@@ -53,11 +53,14 @@ export default function AddressesScreen() {
 		refetch,
 		createAddress,
 		isCreating,
+		updateAddress,
+		isUpdating,
 		deleteAddress,
 	} = useAddresses();
 
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [showAddModal, setShowAddModal] = useState(false);
+	const [editingAddress, setEditingAddress] = useState<UserAddress | null>(null);
 
 	const handleRefresh = useCallback(async () => {
 		setIsRefreshing(true);
@@ -72,29 +75,51 @@ export default function AddressesScreen() {
 		lng: number;
 	} | null>(null);
 
-	const handleAdd = () => {
+	const handleEdit = (item: UserAddress) => {
+		setEditingAddress(item);
+		setSelectedLabel(item.label);
+		setNewLabel(item.label === 'OTHER' ? item.customLabel ?? '' : '');
+		setNewAddress(item.address);
+		setSelectedCoords({ lat: item.lat, lng: item.lng });
+		setShowAddModal(true);
+	};
+
+	const handleAddOrUpdate = () => {
 		if (!newLabel || !newAddress) return;
 		const coords = selectedCoords ?? {
 			lat: currentLocation?.latitude ?? -8.8399,
 			lng: currentLocation?.longitude ?? 13.2344,
 		};
-		createAddress(
-			{
-				label: selectedLabel,
-				customLabel: selectedLabel === 'OTHER' ? newLabel : undefined,
-				address: newAddress,
-				lat: coords.lat,
-				lng: coords.lng,
-			},
-			{
+		const data = {
+			label: selectedLabel,
+			customLabel: selectedLabel === 'OTHER' ? newLabel : undefined,
+			address: newAddress,
+			lat: coords.lat,
+			lng: coords.lng,
+		};
+		if (editingAddress) {
+			updateAddress(
+				{ addressId: editingAddress.id, data },
+				{
+					onSuccess: () => {
+						setEditingAddress(null);
+						setNewLabel('');
+						setNewAddress('');
+						setSelectedLabel('OTHER');
+						setShowAddModal(false);
+					},
+				},
+			);
+		} else {
+			createAddress(data, {
 				onSuccess: () => {
 					setNewLabel('');
 					setNewAddress('');
 					setSelectedLabel('OTHER');
 					setShowAddModal(false);
 				},
-			},
-		);
+			});
+		}
 	};
 
 	const handleDelete = (id: string) => {
@@ -189,6 +214,7 @@ export default function AddressesScreen() {
 									)}
 								>
 									<TouchableOpacity
+										onPress={() => handleEdit(item)}
 										className="flex-row bg-white dark:bg-soft-black rounded-2xl mb-3 overflow-hidden active:opacity-70"
 										style={{
 											elevation: 2,
@@ -301,10 +327,17 @@ export default function AddressesScreen() {
 					behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 					className="flex-1 justify-end"
 				>
-					<Pressable
-						className="absolute inset-0 bg-black/50"
-						onPress={() => setShowAddModal(false)}
-					/>
+				<Pressable
+					className="absolute inset-0 bg-black/50"
+					onPress={() => {
+						setShowAddModal(false);
+						setEditingAddress(null);
+						setNewLabel('');
+						setNewAddress('');
+						setSelectedLabel('OTHER');
+						setSelectedCoords(null);
+					}}
+				/>
 					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 						<View
 							className={`rounded-t-3xl p-6 pb-10 ${isDark ? 'bg-[#121212]' : 'bg-white'}`}
@@ -313,19 +346,26 @@ export default function AddressesScreen() {
 								<Text
 									className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}
 								>
-									Novo Endereço
+									{editingAddress ? 'Editar Endereço' : 'Novo Endereço'}
 								</Text>
-								<TouchableOpacity
-									onPress={() => setShowAddModal(false)}
-									className="w-8 h-8 items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full"
-									activeOpacity={0.6}
-								>
-									<Ionicons
-										name="close"
-										size={20}
-										color={isDark ? '#FFF' : '#000'}
-									/>
-								</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => {
+									setShowAddModal(false);
+									setEditingAddress(null);
+									setNewLabel('');
+									setNewAddress('');
+									setSelectedLabel('OTHER');
+									setSelectedCoords(null);
+								}}
+								className="w-8 h-8 items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full"
+								activeOpacity={0.6}
+							>
+								<Ionicons
+									name="close"
+									size={20}
+									color={isDark ? '#FFF' : '#000'}
+								/>
+							</TouchableOpacity>
 							</View>
 
 							<View
@@ -430,9 +470,9 @@ export default function AddressesScreen() {
 								placeholder="Ex: Rocha Cabine, Luanda"
 							/>
 							<Button
-								title="Adicionar"
-								onPress={handleAdd}
-								loading={isCreating}
+								title={editingAddress ? 'Atualizar' : 'Adicionar'}
+								onPress={handleAddOrUpdate}
+								loading={isCreating || isUpdating}
 							/>
 						</View>
 					</TouchableWithoutFeedback>

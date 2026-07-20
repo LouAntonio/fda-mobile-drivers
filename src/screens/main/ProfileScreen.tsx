@@ -2,6 +2,7 @@
 import {
 	View,
 	Text,
+	Image,
 	ScrollView,
 	TouchableOpacity,
 	Alert,
@@ -18,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useAuthStore } from '../../store/authStore';
@@ -30,6 +32,7 @@ import {
 	confirmPhoneVerification,
 } from '../../services/phone';
 import { fetchProfile } from '../../api/profile';
+import { uploadToCloudinary } from '../../lib/upload';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
@@ -191,6 +194,30 @@ export default function ProfileScreen() {
 		updateMutation.mutate({ name: editName, surname: editSurname });
 	};
 
+	const handleChangePhoto = async () => {
+		const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+		if (!permission.granted) {
+			Alert.alert(
+				'Permissão necessária',
+				'Precisamos de acesso à galeria para alterar a foto.',
+			);
+			return;
+		}
+		const result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ['images'],
+			allowsEditing: true,
+			aspect: [1, 1],
+			quality: 0.7,
+		});
+		if (result.canceled || !result.assets?.[0]?.uri) return;
+		try {
+			const imageUrl = await uploadToCloudinary(result.assets[0].uri, 'FDA/profiles');
+			updateMutation.mutate({ image: imageUrl });
+		} catch {
+			Alert.alert('Erro', 'Não foi possível fazer upload da imagem.');
+		}
+	};
+
 	const isLoading = profileQuery.isLoading || driverLoading;
 	const error = profileQuery.error;
 	const user = profileQuery.data?.user;
@@ -301,20 +328,40 @@ export default function ProfileScreen() {
 							entering={FadeInDown.duration(600)}
 							className="items-center mt-4"
 						>
-							<View
-								className="w-24 h-24 rounded-full bg-primary items-center justify-center"
-								style={{
-									elevation: 8,
-									shadowColor: '#000',
-									shadowOffset: { width: 0, height: 4 },
-									shadowOpacity: 0.15,
-									shadowRadius: 12,
-								}}
+							<TouchableOpacity
+								onPress={handleChangePhoto}
+								activeOpacity={0.8}
+								className="relative"
 							>
-								<Text className="text-4xl font-black text-secondary">
-									{`${user?.name?.charAt(0) || 'M'}${user?.surname?.charAt(0) || ''}`.toUpperCase()}
-								</Text>
-							</View>
+								<View
+									className="w-24 h-24 rounded-full bg-primary items-center justify-center overflow-hidden"
+									style={{
+										elevation: 8,
+										shadowColor: '#000',
+										shadowOffset: { width: 0, height: 4 },
+										shadowOpacity: 0.15,
+										shadowRadius: 12,
+									}}
+								>
+									{user?.image ? (
+										<Image
+											source={{ uri: user.image }}
+											className="w-full h-full"
+										/>
+									) : (
+										<Text className="text-4xl font-black text-secondary">
+											{`${user?.name?.charAt(0) || 'M'}${user?.surname?.charAt(0) || ''}`.toUpperCase()}
+										</Text>
+									)}
+								</View>
+								<View className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary items-center justify-center border-2 border-off-white dark:border-[#090909]">
+									<Ionicons
+										name="camera"
+										size={14}
+										color="#231F20"
+									/>
+								</View>
+							</TouchableOpacity>
 							<Text className="text-2xl font-black text-secondary dark:text-off-white mt-4">
 								{user?.name || 'Motorista'}{' '}
 								{user?.surname || ''}

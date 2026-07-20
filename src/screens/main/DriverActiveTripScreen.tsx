@@ -12,8 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
-import { useTrip } from '../../hooks/useTrips';
-import { useUpdateTripStatus } from '../../hooks/useTrips';
+import { useTrip, useUpdateTripStatus, useUpdateDeliveryStatus } from '../../hooks/useTrips';
 import { useActiveTripSocket } from '../../hooks/useActiveTripSocket';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { useDriverLocation } from '../../hooks/useDriverLocation';
@@ -68,6 +67,7 @@ export default function DriverActiveTripScreen() {
 
 	const { data: trip, isLoading } = useTrip(tripId);
 	const statusMutation = useUpdateTripStatus();
+	const deliveryMutation = useUpdateDeliveryStatus();
 	useActiveTripSocket({ tripId, enabled: true });
 	const { location: currentLocation } = useCurrentLocation();
 	const { route: mapRoute, fetchRoute } = useMapRoute();
@@ -125,6 +125,38 @@ export default function DriverActiveTripScreen() {
 	const statusConfig = trip
 		? (STATUS_CONFIG[trip.status] ?? STATUS_CONFIG.ACCEPTED)
 		: STATUS_CONFIG.ACCEPTED;
+
+	const DELIVERY_STATUS_CONFIG: Record<
+		string,
+		{ label: string; nextStatus?: string; nextLabel?: string }
+	> = {
+		WAITING_PICKUP: {
+			label: 'Aguardando recolha',
+			nextStatus: 'PICKED_UP',
+			nextLabel: 'Recolher Pacote',
+		},
+		PICKED_UP: {
+			label: 'Pacote recolhido',
+			nextStatus: 'IN_TRANSIT',
+			nextLabel: 'Iniciar Entrega',
+		},
+		IN_TRANSIT: {
+			label: 'Entrega em andamento',
+			nextStatus: 'DELIVERED',
+			nextLabel: 'Confirmar Entrega',
+		},
+		DELIVERED: {
+			label: 'Entregue',
+		},
+	};
+
+	const deliveryConfig = trip?.serviceType === 'DELIVERY' && trip.deliveryStatus
+		? (DELIVERY_STATUS_CONFIG[trip.deliveryStatus] ?? DELIVERY_STATUS_CONFIG.WAITING_PICKUP)
+		: null;
+	const deliveryNextLabel = deliveryConfig?.nextStatus
+		? DELIVERY_STATUS_CONFIG[deliveryConfig.nextStatus]?.label
+		: null;
+
 	const client = trip?.client;
 	const isTerminal =
 		trip?.status === 'COMPLETED' || trip?.status === 'CANCELLED';
@@ -380,6 +412,45 @@ export default function DriverActiveTripScreen() {
 								</Text>
 							</View>
 						</View>
+					</View>
+				)}
+
+				{/* Delivery Status */}
+				{trip?.serviceType === 'DELIVERY' && deliveryConfig && !isTerminal && (
+					<View
+						className="py-3 border-t mb-3"
+						style={{ borderColor: isDark ? '#333' : '#F3F4F6' }}
+					>
+						<View className="flex-row items-center justify-between mb-2">
+							<Text className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+								Estado da Entrega
+							</Text>
+							<View className="px-2 py-0.5 rounded-md bg-primary/20">
+								<Text className="text-[10px] font-black text-primary">
+									{deliveryConfig.label}
+								</Text>
+							</View>
+						</View>
+						{deliveryConfig.nextStatus && (
+							<TouchableOpacity
+								onPress={() =>
+									deliveryMutation.mutate({
+										tripId: trip!.id,
+										deliveryStatus: deliveryConfig.nextStatus as any,
+									})
+								}
+								className="py-3 rounded-xl items-center bg-primary/10 border border-primary/20 active:opacity-70"
+								disabled={deliveryMutation.isPending}
+							>
+								{deliveryMutation.isPending ? (
+									<ActivityIndicator color={themeColors.primary} />
+								) : (
+									<Text className="text-sm font-black text-primary">
+										{deliveryConfig.nextLabel}
+									</Text>
+								)}
+							</TouchableOpacity>
+						)}
 					</View>
 				)}
 
