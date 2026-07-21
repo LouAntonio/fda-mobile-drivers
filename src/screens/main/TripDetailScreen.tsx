@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
 	View,
 	Text,
@@ -15,9 +15,16 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { TripDetailSkeleton } from '../../components/skeletons/TripDetailSkeleton';
 import { useTrip, useTripEvents, useOpenDispute } from '../../hooks/useTrips';
+import { useMapRoute } from '../../hooks/useMapRoute';
 import MapView from '../../components/MapView';
 import type { MainStackParamList } from '../../types/navigation';
 import type { TripEventFromApi } from '../../api/trip';
+
+function parseWktPoint(wkt: string): { lat: number; lng: number } | null {
+	const match = wkt.match(/POINT\s*\(\s*([\d.-]+)\s+([\d.-]+)\s*\)/i);
+	if (!match) return null;
+	return { lng: parseFloat(match[1]), lat: parseFloat(match[2]) };
+}
 
 const STATUS_BADGES: Record<string, { label: string; color: string }> = {
 	REQUESTED: { label: 'Solicitada', color: '#F59E0B' },
@@ -53,6 +60,49 @@ export default function TripDetailScreen() {
 	const { data: trip, isLoading } = useTrip(tripId);
 	const { data: events } = useTripEvents(tripId);
 	const disputeMutation = useOpenDispute();
+	const { route: mapRoute, fetchRoute } = useMapRoute();
+
+	const pickupWkt = trip?.actualPickupCoords ?? trip?.pickupCoords;
+	const dropoffWkt = trip?.actualDropoffCoords ?? trip?.dropoffCoords;
+	const pickupCoords = pickupWkt ? parseWktPoint(pickupWkt) : null;
+	const dropoffCoords = dropoffWkt ? parseWktPoint(dropoffWkt) : null;
+
+	useEffect(() => {
+		if (!pickupCoords || !dropoffCoords) return;
+		fetchRoute([pickupCoords.lng, pickupCoords.lat], [dropoffCoords.lng, dropoffCoords.lat]);
+	}, [pickupCoords?.lng, pickupCoords?.lat, dropoffCoords?.lng, dropoffCoords?.lat, fetchRoute]);
+
+	const markers = useMemo(() => {
+		const result: any[] = [];
+		if (pickupCoords) {
+			result.push({
+				id: 'pickup',
+				latitude: pickupCoords.lat,
+				longitude: pickupCoords.lng,
+				title: 'Origem',
+			});
+		}
+		if (dropoffCoords) {
+			result.push({
+				id: 'dropoff',
+				latitude: dropoffCoords.lat,
+				longitude: dropoffCoords.lng,
+				title: 'Destino',
+			});
+		}
+		return result;
+	}, [pickupCoords, dropoffCoords]);
+
+	const routeCoords = useMemo(
+		() =>
+			mapRoute
+				? mapRoute.geometry.coordinates.map(([lng, lat]: number[]) => ({
+						latitude: lat,
+						longitude: lng,
+					}))
+				: [],
+		[mapRoute],
+	);
 
 	if (isLoading) {
 		return (
@@ -164,11 +214,23 @@ export default function TripDetailScreen() {
 					<MapView
 						style={{ flex: 1 }}
 						initialRegion={{
-							latitude: -8.8399,
-							longitude: 13.2344,
+							latitude:
+								markers.length >= 2
+									? (markers[0].latitude +
+											markers[1].latitude) /
+										2
+									: pickupCoords?.lat ?? -8.8399,
+							longitude:
+								markers.length >= 2
+									? (markers[0].longitude +
+											markers[1].longitude) /
+										2
+									: pickupCoords?.lng ?? 13.2344,
 							latitudeDelta: 0.05,
 							longitudeDelta: 0.05,
 						}}
+						markers={markers}
+						routeCoords={routeCoords}
 					/>
 				</Animated.View>
 

@@ -83,51 +83,46 @@ export default function DriverActiveTripScreen() {
 		!!trip && trip.status !== 'COMPLETED' && trip.status !== 'CANCELLED';
 	useDriverLocation({ enabled: isTripActive, tripId });
 
-	const [routeFetched, setRouteFetched] = useState(false);
-
-	const pickupCoords = trip?.pickupCoords
-		? parseWktPoint(trip.pickupCoords)
-		: null;
-	const dropoffCoords = trip?.dropoffCoords
-		? parseWktPoint(trip.dropoffCoords)
-		: null;
+	const pUpWkt = trip?.actualPickupCoords ?? trip?.pickupCoords;
+	const pDownWkt = trip?.actualDropoffCoords ?? trip?.dropoffCoords;
+	const pickupCoords = pUpWkt ? parseWktPoint(pUpWkt) : null;
+	const dropoffCoords = pDownWkt ? parseWktPoint(pDownWkt) : null;
+	const isTerminal =
+		trip?.status === 'COMPLETED' || trip?.status === 'CANCELLED';
 
 	useEffect(() => {
-		if (!trip || routeFetched) return;
-		if (trip.status === 'ACCEPTED' && pickupCoords && currentLocation) {
+		if (!trip || isTerminal) return;
+		if (trip.status === 'ACCEPTED') {
+			if (!currentLocation) return;
+			if (!pickupCoords) return;
 			fetchRoute(
 				[currentLocation.longitude, currentLocation.latitude],
 				[pickupCoords.lng, pickupCoords.lat],
 			);
-			setRouteFetched(true);
-		} else if (
-			pickupCoords &&
-			dropoffCoords &&
-			(trip.status === 'PICKUP_IN_PROGRESS' || trip.status === 'STARTED')
-		) {
-			if (trip.status === 'PICKUP_IN_PROGRESS') {
-				fetchRoute(
-					[
-						currentLocation?.longitude ?? pickupCoords.lng,
-						currentLocation?.latitude ?? pickupCoords.lat,
-					],
-					[dropoffCoords.lng, dropoffCoords.lat],
-				);
-			} else {
-				fetchRoute(
-					[pickupCoords.lng, pickupCoords.lat],
-					[dropoffCoords.lng, dropoffCoords.lat],
-				);
-			}
-			setRouteFetched(true);
+		} else if (trip.status === 'PICKUP_IN_PROGRESS') {
+			if (!dropoffCoords) return;
+			fetchRoute(
+				[
+					currentLocation?.longitude ?? pickupCoords?.lng ?? dropoffCoords.lng,
+					currentLocation?.latitude ?? pickupCoords?.lat ?? dropoffCoords.lat,
+				],
+				[dropoffCoords.lng, dropoffCoords.lat],
+			);
+		} else if (trip.status === 'STARTED') {
+			if (!pickupCoords || !dropoffCoords) return;
+			fetchRoute(
+				[pickupCoords.lng, pickupCoords.lat],
+				[dropoffCoords.lng, dropoffCoords.lat],
+			);
 		}
 	}, [
-		trip,
-		currentLocation,
+		trip?.status,
+		trip?.id,
 		pickupCoords,
 		dropoffCoords,
+		currentLocation,
 		fetchRoute,
-		routeFetched,
+		isTerminal,
 	]);
 
 	const statusConfig = trip
@@ -164,9 +159,6 @@ export default function DriverActiveTripScreen() {
 				DELIVERY_STATUS_CONFIG.WAITING_PICKUP)
 			: null;
 	const client = trip?.client;
-	const isTerminal =
-		trip?.status === 'COMPLETED' || trip?.status === 'CANCELLED';
-
 	const currentStepIndex = trip
 		? STEPS.findIndex((s) => s.key === trip.status)
 		: -1;

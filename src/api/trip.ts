@@ -20,6 +20,8 @@ export interface TripFromApi {
 	dropoffCoords?: string;
 	estimatedDistanceKm: number | null;
 	estimatedDurationMin: number | null;
+	actualPickupCoords?: string;
+	actualDropoffCoords?: string;
 	actualDistanceKm: number | null;
 	actualDurationMin: number | null;
 	surgeMultiplierApplied: number;
