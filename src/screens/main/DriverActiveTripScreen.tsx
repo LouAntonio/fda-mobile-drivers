@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
 	View,
 	Text,
@@ -89,16 +89,19 @@ export default function DriverActiveTripScreen() {
 	const dropoffCoords = pDownWkt ? parseWktPoint(pDownWkt) : null;
 	const isTerminal =
 		trip?.status === 'COMPLETED' || trip?.status === 'CANCELLED';
+	const lastRouteStatusRef = useRef<string | null>(null);
 
 	useEffect(() => {
 		if (!trip || isTerminal) return;
+		if (trip.status === lastRouteStatusRef.current) return;
+
 		if (trip.status === 'ACCEPTED') {
-			if (!currentLocation) return;
-			if (!pickupCoords) return;
+			if (!currentLocation || !pickupCoords) return;
 			fetchRoute(
 				[currentLocation.longitude, currentLocation.latitude],
 				[pickupCoords.lng, pickupCoords.lat],
 			);
+			lastRouteStatusRef.current = 'ACCEPTED';
 		} else if (trip.status === 'PICKUP_IN_PROGRESS') {
 			if (!dropoffCoords) return;
 			fetchRoute(
@@ -108,22 +111,16 @@ export default function DriverActiveTripScreen() {
 				],
 				[dropoffCoords.lng, dropoffCoords.lat],
 			);
+			lastRouteStatusRef.current = 'PICKUP_IN_PROGRESS';
 		} else if (trip.status === 'STARTED') {
 			if (!pickupCoords || !dropoffCoords) return;
 			fetchRoute(
 				[pickupCoords.lng, pickupCoords.lat],
 				[dropoffCoords.lng, dropoffCoords.lat],
 			);
+			lastRouteStatusRef.current = 'STARTED';
 		}
-	}, [
-		trip?.status,
-		trip?.id,
-		pickupCoords,
-		dropoffCoords,
-		currentLocation,
-		fetchRoute,
-		isTerminal,
-	]);
+	}, [trip?.status, trip?.id, currentLocation?.latitude, currentLocation?.longitude, pickupCoords?.lat, pickupCoords?.lng, dropoffCoords?.lat, dropoffCoords?.lng]);
 
 	const statusConfig = trip
 		? (STATUS_CONFIG[trip.status] ?? STATUS_CONFIG.ACCEPTED)
