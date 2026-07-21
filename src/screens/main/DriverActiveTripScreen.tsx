@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
 	View,
 	Text,
@@ -106,8 +106,12 @@ export default function DriverActiveTripScreen() {
 			if (!dropoffCoords) return;
 			fetchRoute(
 				[
-					currentLocation?.longitude ?? pickupCoords?.lng ?? dropoffCoords.lng,
-					currentLocation?.latitude ?? pickupCoords?.lat ?? dropoffCoords.lat,
+					currentLocation?.longitude ??
+						pickupCoords?.lng ??
+						dropoffCoords.lng,
+					currentLocation?.latitude ??
+						pickupCoords?.lat ??
+						dropoffCoords.lat,
 				],
 				[dropoffCoords.lng, dropoffCoords.lat],
 			);
@@ -120,7 +124,17 @@ export default function DriverActiveTripScreen() {
 			);
 			lastRouteStatusRef.current = 'STARTED';
 		}
-	}, [trip?.status, trip?.id, currentLocation?.latitude, currentLocation?.longitude, pickupCoords?.lat, pickupCoords?.lng, dropoffCoords?.lat, dropoffCoords?.lng]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [
+		trip?.status,
+		trip?.id,
+		currentLocation?.latitude,
+		currentLocation?.longitude,
+		pickupCoords?.lat,
+		pickupCoords?.lng,
+		dropoffCoords?.lat,
+		dropoffCoords?.lng,
+	]);
 
 	const statusConfig = trip
 		? (STATUS_CONFIG[trip.status] ?? STATUS_CONFIG.ACCEPTED)

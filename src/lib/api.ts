@@ -91,7 +91,9 @@ api.interceptors.response.use(
 			isRefreshing = true;
 
 			try {
-				const { data } = await api.post('/auth/refresh', { refreshToken });
+				const { data } = await api.post('/auth/refresh', {
+					refreshToken,
+				});
 				const tokens = data as unknown as {
 					accessToken: string;
 					refreshToken: string;

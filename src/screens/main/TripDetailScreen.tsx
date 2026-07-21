@@ -69,8 +69,17 @@ export default function TripDetailScreen() {
 
 	useEffect(() => {
 		if (!pickupCoords || !dropoffCoords) return;
-		fetchRoute([pickupCoords.lng, pickupCoords.lat], [dropoffCoords.lng, dropoffCoords.lat]);
-	}, [pickupCoords?.lng, pickupCoords?.lat, dropoffCoords?.lng, dropoffCoords?.lat, fetchRoute]);
+		fetchRoute(
+			[pickupCoords.lng, pickupCoords.lat],
+			[dropoffCoords.lng, dropoffCoords.lat],
+		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [
+		pickupCoords?.lng,
+		pickupCoords?.lat,
+		dropoffCoords?.lng,
+		dropoffCoords?.lat,
+	]);
 
 	const markers = useMemo(() => {
 		const result: any[] = [];
@@ -219,13 +228,13 @@ export default function TripDetailScreen() {
 									? (markers[0].latitude +
 											markers[1].latitude) /
 										2
-									: pickupCoords?.lat ?? -8.8399,
+									: (pickupCoords?.lat ?? -8.8399),
 							longitude:
 								markers.length >= 2
 									? (markers[0].longitude +
 											markers[1].longitude) /
 										2
-									: pickupCoords?.lng ?? 13.2344,
+									: (pickupCoords?.lng ?? 13.2344),
 							latitudeDelta: 0.05,
 							longitudeDelta: 0.05,
 						}}
