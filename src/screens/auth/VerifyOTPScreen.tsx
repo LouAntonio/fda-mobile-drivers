@@ -117,8 +117,8 @@ export default function VerifyTokenScreen() {
 								{ color: themeColors.secondary },
 							]}
 						>
-							Enviamos um código de recuperação para {phoneNumber}.
-							Insira abaixo o token recebido para continuar.
+							Enviamos um código de recuperação para {phoneNumber}
+							. Insira abaixo o token recebido para continuar.
 						</Text>
 					</Animated.View>
 
@@ -139,7 +139,9 @@ export default function VerifyTokenScreen() {
 						/>
 
 						<TouchableOpacity
-							onPress={() => resendMutation.mutate({ phoneNumber })}
+							onPress={() =>
+								resendMutation.mutate({ phoneNumber })
+							}
 							className="items-center py-2"
 							activeOpacity={0.6}
 						>

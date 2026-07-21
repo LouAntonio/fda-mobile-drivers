@@ -108,8 +108,8 @@ export default function ForgotPasswordScreen() {
 								{ color: themeColors.secondary },
 							]}
 						>
-							Informe o seu número de telefone para
-							receber um código de recuperação.
+							Informe o seu número de telefone para receber um
+							código de recuperação.
 						</Text>
 					</Animated.View>
 

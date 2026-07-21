@@ -58,8 +58,6 @@ export async function updateBankAccount(
 export async function deleteBankAccount(
 	accountId: string,
 ): Promise<{ msg: string }> {
-	const { data } = await api.delete(
-		`/drivers/me/bank-accounts/${accountId}`,
-	);
+	const { data } = await api.delete(`/drivers/me/bank-accounts/${accountId}`);
 	return data as { msg: string };
 }

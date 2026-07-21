@@ -186,7 +186,8 @@ export default function ProfileScreen() {
 	};
 
 	const handleChangePhoto = async () => {
-		const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+		const permission =
+			await ImagePicker.requestMediaLibraryPermissionsAsync();
 		if (!permission.granted) {
 			Alert.alert(
 				'Permissão necessária',
@@ -202,7 +203,10 @@ export default function ProfileScreen() {
 		});
 		if (result.canceled || !result.assets?.[0]?.uri) return;
 		try {
-			const imageUrl = await uploadToCloudinary(result.assets[0].uri, 'FDA/profiles');
+			const imageUrl = await uploadToCloudinary(
+				result.assets[0].uri,
+				'FDA/profiles',
+			);
 			updateMutation.mutate({ image: imageUrl });
 		} catch {
 			Alert.alert('Erro', 'Não foi possível fazer upload da imagem.');

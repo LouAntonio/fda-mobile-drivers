@@ -34,9 +34,13 @@ export class ErrorBoundary extends Component<Props, State> {
 				<View style={styles.container}>
 					<Text style={styles.title}>Algo deu errado</Text>
 					<Text style={styles.message}>
-						{this.state.error?.message || 'Ocorreu um erro inesperado.'}
+						{this.state.error?.message ||
+							'Ocorreu um erro inesperado.'}
 					</Text>
-					<TouchableOpacity style={styles.button} onPress={this.handleReset}>
+					<TouchableOpacity
+						style={styles.button}
+						onPress={this.handleReset}
+					>
 						<Text style={styles.buttonText}>Tentar novamente</Text>
 					</TouchableOpacity>
 				</View>

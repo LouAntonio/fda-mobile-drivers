@@ -12,7 +12,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useThemeColors } from '../../hooks/useThemeColors';
-import { useTrip, useUpdateTripStatus, useUpdateDeliveryStatus, useRegisterCashCollection, useCancelTrip } from '../../hooks/useTrips';
+import {
+	useTrip,
+	useUpdateTripStatus,
+	useUpdateDeliveryStatus,
+	useRegisterCashCollection,
+	useCancelTrip,
+} from '../../hooks/useTrips';
 import { useActiveTripSocket } from '../../hooks/useActiveTripSocket';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { useDriverLocation } from '../../hooks/useDriverLocation';
@@ -152,13 +158,11 @@ export default function DriverActiveTripScreen() {
 		},
 	};
 
-	const deliveryConfig = trip?.serviceType === 'DELIVERY' && trip.deliveryStatus
-		? (DELIVERY_STATUS_CONFIG[trip.deliveryStatus] ?? DELIVERY_STATUS_CONFIG.WAITING_PICKUP)
-		: null;
-	const deliveryNextLabel = deliveryConfig?.nextStatus
-		? DELIVERY_STATUS_CONFIG[deliveryConfig.nextStatus]?.label
-		: null;
-
+	const deliveryConfig =
+		trip?.serviceType === 'DELIVERY' && trip.deliveryStatus
+			? (DELIVERY_STATUS_CONFIG[trip.deliveryStatus] ??
+				DELIVERY_STATUS_CONFIG.WAITING_PICKUP)
+			: null;
 	const client = trip?.client;
 	const isTerminal =
 		trip?.status === 'COMPLETED' || trip?.status === 'CANCELLED';
@@ -424,19 +428,31 @@ export default function DriverActiveTripScreen() {
 						</Text>
 						<View className="gap-1.5">
 							<View className="flex-row items-center">
-								<Ionicons name="person-outline" size={14} color={isDark ? '#999' : '#666'} />
+								<Ionicons
+									name="person-outline"
+									size={14}
+									color={isDark ? '#999' : '#666'}
+								/>
 								<Text className="ml-2 text-sm text-secondary dark:text-off-white">
 									{trip.deliveryDetails.receiverName}
 								</Text>
 							</View>
 							<View className="flex-row items-center">
-								<Ionicons name="call-outline" size={14} color={isDark ? '#999' : '#666'} />
+								<Ionicons
+									name="call-outline"
+									size={14}
+									color={isDark ? '#999' : '#666'}
+								/>
 								<Text className="ml-2 text-sm text-secondary dark:text-off-white">
 									{trip.deliveryDetails.receiverPhone}
 								</Text>
 							</View>
 							<View className="flex-row items-center">
-								<Ionicons name="cube-outline" size={14} color={isDark ? '#999' : '#666'} />
+								<Ionicons
+									name="cube-outline"
+									size={14}
+									color={isDark ? '#999' : '#666'}
+								/>
 								<Text className="ml-2 text-sm text-secondary dark:text-off-white capitalize">
 									{trip.deliveryDetails.packageType?.toLowerCase()}
 								</Text>
@@ -446,43 +462,48 @@ export default function DriverActiveTripScreen() {
 				)}
 
 				{/* Delivery Status */}
-				{trip?.serviceType === 'DELIVERY' && deliveryConfig && !isTerminal && (
-					<View
-						className="py-3 border-t mb-3"
-						style={{ borderColor: isDark ? '#333' : '#F3F4F6' }}
-					>
-						<View className="flex-row items-center justify-between mb-2">
-							<Text className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-								Estado da Entrega
-							</Text>
-							<View className="px-2 py-0.5 rounded-md bg-primary/20">
-								<Text className="text-[10px] font-black text-primary">
-									{deliveryConfig.label}
+				{trip?.serviceType === 'DELIVERY' &&
+					deliveryConfig &&
+					!isTerminal && (
+						<View
+							className="py-3 border-t mb-3"
+							style={{ borderColor: isDark ? '#333' : '#F3F4F6' }}
+						>
+							<View className="flex-row items-center justify-between mb-2">
+								<Text className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+									Estado da Entrega
 								</Text>
-							</View>
-						</View>
-						{deliveryConfig.nextStatus && (
-							<TouchableOpacity
-								onPress={() =>
-									deliveryMutation.mutate({
-										tripId: trip!.id,
-										deliveryStatus: deliveryConfig.nextStatus as any,
-									})
-								}
-								className="py-3 rounded-xl items-center bg-primary/10 border border-primary/20 active:opacity-70"
-								disabled={deliveryMutation.isPending}
-							>
-								{deliveryMutation.isPending ? (
-									<ActivityIndicator color={themeColors.primary} />
-								) : (
-									<Text className="text-sm font-black text-primary">
-										{deliveryConfig.nextLabel}
+								<View className="px-2 py-0.5 rounded-md bg-primary/20">
+									<Text className="text-[10px] font-black text-primary">
+										{deliveryConfig.label}
 									</Text>
-								)}
-							</TouchableOpacity>
-						)}
-					</View>
-				)}
+								</View>
+							</View>
+							{deliveryConfig.nextStatus && (
+								<TouchableOpacity
+									onPress={() =>
+										deliveryMutation.mutate({
+											tripId: trip!.id,
+											deliveryStatus:
+												deliveryConfig.nextStatus as any,
+										})
+									}
+									className="py-3 rounded-xl items-center bg-primary/10 border border-primary/20 active:opacity-70"
+									disabled={deliveryMutation.isPending}
+								>
+									{deliveryMutation.isPending ? (
+										<ActivityIndicator
+											color={themeColors.primary}
+										/>
+									) : (
+										<Text className="text-sm font-black text-primary">
+											{deliveryConfig.nextLabel}
+										</Text>
+									)}
+								</TouchableOpacity>
+							)}
+						</View>
+					)}
 
 				{/* Client */}
 				{client && (
@@ -555,48 +576,48 @@ export default function DriverActiveTripScreen() {
 					</TouchableOpacity>
 				)}
 
-			{trip?.status === 'COMPLETED' &&
-				trip?.paymentMethod === 'CASH' &&
-				trip?.paymentStatus !== 'PAID' && (
+				{trip?.status === 'COMPLETED' &&
+					trip?.paymentMethod === 'CASH' &&
+					trip?.paymentStatus !== 'PAID' && (
+						<TouchableOpacity
+							onPress={() =>
+								cashCollectionMutation.mutate({
+									tripId: trip.id,
+									driverId: trip.driver?.id ?? '',
+								})
+							}
+							className="py-4 rounded-2xl items-center bg-green-500 active:opacity-70 mb-3"
+							disabled={cashCollectionMutation.isPending}
+						>
+							{cashCollectionMutation.isPending ? (
+								<ActivityIndicator color="#FFF" />
+							) : (
+								<View className="flex-row items-center gap-2">
+									<Ionicons
+										name="cash-outline"
+										size={20}
+										color="#FFF"
+									/>
+									<Text className="text-base font-black text-white">
+										Registar Recolha de Cash
+									</Text>
+								</View>
+							)}
+						</TouchableOpacity>
+					)}
+
+				{isTerminal && (
 					<TouchableOpacity
 						onPress={() =>
-							cashCollectionMutation.mutate({
-								tripId: trip.id,
-								driverId: trip.driver?.id ?? '',
-							})
+							navigation.replace('TripDetail', { tripId })
 						}
-						className="py-4 rounded-2xl items-center bg-green-500 active:opacity-70 mb-3"
-						disabled={cashCollectionMutation.isPending}
+						className="py-4 rounded-2xl items-center bg-primary active:opacity-70"
 					>
-						{cashCollectionMutation.isPending ? (
-							<ActivityIndicator color="#FFF" />
-						) : (
-							<View className="flex-row items-center gap-2">
-								<Ionicons
-									name="cash-outline"
-									size={20}
-									color="#FFF"
-								/>
-								<Text className="text-base font-black text-white">
-									Registar Recolha de Cash
-								</Text>
-							</View>
-						)}
+						<Text className="text-base font-black text-secondary">
+							Ver Detalhes
+						</Text>
 					</TouchableOpacity>
 				)}
-
-			{isTerminal && (
-				<TouchableOpacity
-					onPress={() =>
-						navigation.replace('TripDetail', { tripId })
-					}
-					className="py-4 rounded-2xl items-center bg-primary active:opacity-70"
-				>
-					<Text className="text-base font-black text-secondary">
-						Ver Detalhes
-					</Text>
-				</TouchableOpacity>
-			)}
 			</Animated.View>
 		</SafeAreaView>
 	);

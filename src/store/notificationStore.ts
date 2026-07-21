@@ -38,7 +38,9 @@ export const useNotificationStore = create<NotificationState>()(
 
 			fetchFromServer: async () => {
 				try {
-					const { data } = await api.get('/users/me/notification-preferences');
+					const { data } = await api.get(
+						'/users/me/notification-preferences',
+					);
 					if (data) {
 						set({
 							pushEnabled: data.pushEnabled ?? true,

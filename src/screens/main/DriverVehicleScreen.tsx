@@ -105,7 +105,11 @@ export default function DriverVehicleScreen() {
 		}
 		const yearNum = parseInt(year, 10);
 		if (yearNum < 1990 || yearNum > new Date().getFullYear() + 1) {
-			Alert.alert('Erro', 'Ano inválido. Insira um ano entre 1990 e ' + (new Date().getFullYear() + 1));
+			Alert.alert(
+				'Erro',
+				'Ano inválido. Insira um ano entre 1990 e ' +
+					(new Date().getFullYear() + 1),
+			);
 			return;
 		}
 		createMutation.mutate(
@@ -146,7 +150,11 @@ export default function DriverVehicleScreen() {
 		}
 		const yearNum = parseInt(year, 10);
 		if (yearNum < 1990 || yearNum > new Date().getFullYear() + 1) {
-			Alert.alert('Erro', 'Ano inválido. Insira um ano entre 1990 e ' + (new Date().getFullYear() + 1));
+			Alert.alert(
+				'Erro',
+				'Ano inválido. Insira um ano entre 1990 e ' +
+					(new Date().getFullYear() + 1),
+			);
 			return;
 		}
 		updateMutation.mutate(

@@ -85,7 +85,9 @@ export default function DriverEarningsScreen() {
 	const [accountHolder, setAccountHolder] = useState('');
 
 	useEffect(() => {
-		fetchBankAccounts().then(setBankAccounts).catch(() => {});
+		fetchBankAccounts()
+			.then(setBankAccounts)
+			.catch(() => {});
 	}, []);
 
 	const handleAddBankAccount = async () => {
@@ -451,15 +453,19 @@ export default function DriverEarningsScreen() {
 										)}
 									</View>
 									<Text className="text-xs text-gray-500 mt-0.5">
-										{account.accountHolder} •{' '}
-										{account.iban}
+										{account.accountHolder} • {account.iban}
 									</Text>
 								</View>
 								<TouchableOpacity
 									onPress={() =>
 										handleDeleteBankAccount(account.id)
 									}
-									hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+									hitSlop={{
+										top: 10,
+										bottom: 10,
+										left: 10,
+										right: 10,
+									}}
 									activeOpacity={0.7}
 								>
 									<Ionicons
