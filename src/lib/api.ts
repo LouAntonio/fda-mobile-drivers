@@ -1,7 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { API_URL } from '@env';
 import { useAuthStore } from '../store/authStore';
-import { refreshTokens } from '../services/auth';
 import { navigationRef } from './navigationRef';
 
 export const api = axios.create({
@@ -92,7 +91,7 @@ api.interceptors.response.use(
 			isRefreshing = true;
 
 			try {
-				const { data } = await refreshTokens(refreshToken);
+				const { data } = await api.post('/auth/refresh', { refreshToken });
 				const tokens = data as unknown as {
 					accessToken: string;
 					refreshToken: string;
