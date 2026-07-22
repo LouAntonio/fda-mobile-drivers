@@ -57,8 +57,8 @@ export default function ResetPasswordScreen() {
 	});
 
 	const handleReset = () => {
-		if (password.length < 8) {
-			Alert.alert('Erro', 'A senha deve ter pelo menos 8 caracteres.');
+		if (password.length < 6) {
+			Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
 			return;
 		}
 		if (password !== confirmPassword) {
