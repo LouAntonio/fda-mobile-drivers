@@ -37,7 +37,11 @@ export type DriverComplianceStatus =
 
 export type DriverAvailability = 'ONLINE' | 'OFFLINE' | 'BUSY';
 
-export type TripAssignmentStatus = 'OFFERED' | 'REJECTED' | 'ACCEPTED' | 'EXPIRED';
+export type TripAssignmentStatus =
+	| 'OFFERED'
+	| 'REJECTED'
+	| 'ACCEPTED'
+	| 'EXPIRED';
 
 export type DeliveryStatus =
 	| 'WAITING_PICKUP'
