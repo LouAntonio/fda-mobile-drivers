@@ -20,7 +20,8 @@ export type TripStatus =
 	| 'PICKUP_IN_PROGRESS'
 	| 'STARTED'
 	| 'COMPLETED'
-	| 'CANCELLED';
+	| 'CANCELLED'
+	| 'NEEDS_REVIEW';
 
 export type PaymentMethod = 'CASH' | 'MCX_EXPRESS' | 'UNITEL_MONEY';
 
