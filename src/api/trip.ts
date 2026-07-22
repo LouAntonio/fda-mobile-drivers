@@ -1,6 +1,5 @@
 import { api } from '../lib/api';
 import type {
-	Coords,
 	TripStatus,
 	ServiceType,
 	PaymentMethod,
@@ -128,34 +127,6 @@ export interface ListTripsResponse {
 	totalPages: number;
 }
 
-export interface CreateTripPayload {
-	serviceType: ServiceType;
-	pickupCoords: Coords;
-	dropoffCoords: Coords;
-	pickupAddress: string;
-	pickupReference?: string;
-	dropoffAddress: string;
-	dropoffReference?: string;
-	paymentMethod: PaymentMethod;
-	vehicleType: 'MOTO' | 'CARRO';
-	idempotencyKey?: string;
-	couponCode?: string;
-	changeFor?: number;
-	deliveryDetails?: {
-		receiverName: string;
-		receiverPhone: string;
-		packageType: string;
-		notes?: string;
-	};
-}
-
-export interface EstimateTripPayload {
-	serviceType: ServiceType;
-	pickupCoords: Coords;
-	dropoffCoords: Coords;
-	vehicleType: 'MOTO' | 'CARRO';
-}
-
 export interface ListTripsFilters {
 	page?: number;
 	limit?: number;
@@ -185,20 +156,6 @@ export async function fetchTrips(
 
 export async function fetchTripById(id: string): Promise<TripFromApi> {
 	const { data } = await api.get(`/trips/${id}`);
-	return data as TripFromApi;
-}
-
-export async function estimateTrip(
-	payload: EstimateTripPayload,
-): Promise<EstimateResult> {
-	const { data } = await api.post('/trips/estimate', payload);
-	return data as EstimateResult;
-}
-
-export async function createTrip(
-	payload: CreateTripPayload,
-): Promise<TripFromApi> {
-	const { data } = await api.post('/trips', payload);
 	return data as TripFromApi;
 }
 

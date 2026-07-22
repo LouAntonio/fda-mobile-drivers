@@ -9,8 +9,6 @@ import { AxiosError } from 'axios';
 import {
 	fetchTrips,
 	fetchTripById,
-	estimateTrip,
-	createTrip,
 	cancelTrip,
 	fetchTripEvents,
 	openDispute,
@@ -18,8 +16,6 @@ import {
 	updateDeliveryStatus,
 	registerCashCollection,
 	type ListTripsFilters,
-	type EstimateTripPayload,
-	type CreateTripPayload,
 } from '../api/trip';
 import { tripKeys } from '../lib/queryKeys';
 import type { TripStatus, DeliveryStatus } from '../types/api';
@@ -52,7 +48,7 @@ export function useTrip(id: string | undefined) {
 			) {
 				return false;
 			}
-			return 10000;
+			return 30000;
 		},
 	});
 }
@@ -62,29 +58,6 @@ export function useTripEvents(id: string | undefined) {
 		queryKey: tripKeys.events(id!),
 		queryFn: () => fetchTripEvents(id!),
 		enabled: !!id,
-	});
-}
-
-export function useEstimateTrip() {
-	return useMutation({
-		mutationFn: (payload: EstimateTripPayload) => estimateTrip(payload),
-	});
-}
-
-export function useRequestTrip() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: (payload: CreateTripPayload) => createTrip(payload),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
-		},
-		onError: (err: AxiosError<{ msg?: string }>) => {
-			Alert.alert(
-				'Erro',
-				err.response?.data?.msg || 'Erro ao solicitar viagem',
-			);
-		},
 	});
 }
 
