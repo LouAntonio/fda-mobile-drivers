@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
 	View,
 	Text,
@@ -18,13 +18,10 @@ import { AxiosError } from 'axios';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { AuthStackParamList } from '../../types/navigation';
 import { useThemeColors } from '../../hooks/useThemeColors';
-import { useAuthStore } from '../../store/authStore';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import GoogleButton from '../../components/GoogleButton';
-import { registerUser, loginWithGoogle } from '../../services/auth';
+import { registerUser } from '../../services/auth';
 import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
-import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 
 type RegisterNavigationProp = NativeStackNavigationProp<
 	AuthStackParamList,
@@ -59,35 +56,6 @@ export default function RegisterScreen() {
 			);
 		},
 	});
-
-	const googleAuth = useGoogleAuth();
-	const setAuth = useAuthStore((state) => state.setAuth);
-
-	useEffect(() => {
-		if (googleAuth.response?.type === 'success') {
-			const idToken = googleAuth.response.params.id_token;
-			if (idToken) {
-				loginWithGoogle(idToken)
-					.then((res) => {
-						const data = res.data as unknown as {
-							accessToken: string;
-							refreshToken: string;
-							user: import('../../store/authStore').User;
-						};
-						setAuth(data.user, data.accessToken, data.refreshToken);
-						// @ts-ignore - Main is in RootStackParamList
-						navigation.replace('Main');
-					})
-					.catch((err: AxiosError<{ msg?: string }>) => {
-						Alert.alert(
-							'Erro',
-							err.response?.data?.msg ||
-								'Erro ao autenticar com Google.',
-						);
-					});
-			}
-		}
-	}, [googleAuth.response, setAuth, navigation]);
 
 	const handleRegister = () => {
 		if (
@@ -212,27 +180,6 @@ export default function RegisterScreen() {
 							onPress={handleRegister}
 							loading={mutation.isPending}
 							className="mt-4 mb-8"
-						/>
-
-						<View className="flex-row items-center mb-6">
-							<View
-								className="flex-1 h-px"
-								style={{ backgroundColor: themeColors.border }}
-							/>
-							<Text
-								className="mx-4 text-sm font-semibold"
-								style={{ color: themeColors.secondary }}
-							>
-								ou
-							</Text>
-							<View
-								className="flex-1 h-px"
-								style={{ backgroundColor: themeColors.border }}
-							/>
-						</View>
-
-						<GoogleButton
-							onPress={() => googleAuth.promptAsync()}
 						/>
 
 						<View className="flex-row items-center justify-center mt-12 mb-6">
