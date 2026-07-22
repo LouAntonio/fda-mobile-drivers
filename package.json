@@ -12,7 +12,8 @@
 		"typecheck": "tsc --noEmit",
 		"format": "prettier . --write",
 		"format:check": "prettier . --check",
-		"doctor": "expo-doctor"
+		"doctor": "expo-doctor",
+		"cipipe": "npm run format:check && npm run lint && npm run typecheck && npm run doctor"
 	},
 	"dependencies": {
 		"@expo/vector-icons": "^15.1.1",
